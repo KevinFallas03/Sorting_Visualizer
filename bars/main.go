@@ -31,7 +31,7 @@ const (
 		}
 	` + "\x00"
 
-	rows    = 116
+	rows    = 200
 	columns = 1280
 
 	threshold = 0.15
@@ -41,12 +41,12 @@ const (
 var (
 	square = []float32{
 		-0.1, 0.1, 0,
-		-0.1, -0.5, 0, //-0.1, -0.5, 0,
-		0.1, -0.5, 0, //0.1, -0.5, 0,
+		-0.1, -0.1, 0, //-0.1, -0.5, 0,
+		0.1, -0.1, 0, //0.1, -0.5, 0,
 
 		-0.1, 0.1, 0,
 		0.1, 0.1, 0,
-		0.1, -0.5, 0, //0.1, -0.5, 0,
+		0.1, -0.1, 0, //0.1, -0.5, 0,
 	}
 	// square = []float32{
 	// 	-0.5, 0.5, 0,
@@ -75,72 +75,82 @@ func main() {
 	program := initOpenGL()
 
 	//cells := makeCells()
-	//graph := setBars(0)
-	//graph2 := setBars(5)
+	graphs := make([][][]*bar, 6, 6)
+	for i := 0; i < 6; i++ {
+		graph := setBars(float32(i)*3.4)
+		graphs[i] = graph
+	}
 
 	for !window.ShouldClose() {
 		t := time.Now()
-		graph := setBars(0)
-		draw(graph, window, program)
-
+		graphs := make([][][]*bar, 6, 6)
+		for i := 0; i < 6; i++ {
+			graph := setBars(float32(i)*3.4)
+			graphs[i] = graph
+		}
+		draw(graphs, window, program)
+		
 		time.Sleep(time.Second/time.Duration(fps) - time.Since(t))
 	}
 }
 
-func draw(cells [][]*bar, window *glfw.Window, program uint32) {
+
+func draw(cells [][][]*bar, window *glfw.Window, program uint32) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.UseProgram(program)
-
-	for x := range cells {
-		for _, c := range cells[x] {
-			c.draw()
+	for g := range cells{
+		for x := range cells[g] {
+			for _, c := range cells[g][x] {
+				c.draw()
+			}
 		}
 	}
-
 	glfw.PollEvents()
 	window.SwapBuffers()
 }
 
-func setBars(y int) [][]*bar {
+func setBars(y float32) [][]*bar {
 	rand.Seed(time.Now().UnixNano())
 
 	cells := make([][]*bar, columns, columns)
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 5000; i++ {
 		c := newCell(i, y, int(rand.Int31n(31 + 1)))
-
 		cells[1] = append(cells[1], c)
 	}
 	return cells
 }
-func newCell(x, y, value int) *bar {
+func newCell(x int, y float32, value int) *bar {
 	points := make([]float32, len(square), len(square))
 	copy(points, square)
 
 	for i := 0; i < len(points); i++ {
 		var position float32
 		var size float32
+		var m float32
 		switch i % 3 {
 		case 0:
-			size = 1.0 / float32(columns)
+			size = 2.0 / float32(columns)
 			position = float32(x) * size
+			m = 0
 		case 1:
-			size = float32(value) * 3
-			position = float32(y)
+			size = float32(value)/float32(rows)
+			position = 0
+			m = y/10
 		default:
 			continue
 		}
 
 		if points[i] < 0 {
-			points[i] = (position * 2) - 1
+			points[i] = ((position * 2) - 1)+m
 		} else {
-			points[i] = ((position + size) * 2) - 1
+			points[i] = (((position + size) * 2) - 1)+m
 		}
 	}
 	return &bar{
 		drawable: makeVao(points),
 
 		x:     x,
-		y:     y,
+		y:     int(y),
 		value: value,
 	}
 }
