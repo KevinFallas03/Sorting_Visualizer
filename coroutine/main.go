@@ -31,15 +31,15 @@ const (
 		}
 	` + "\x00"
 
-	rows    = 200
-	columns = 1280
+	rows = 200
 
 	threshold = 0.15
 	fps       = 10
 )
 
 var (
-	square = []float32{
+	columns = 0
+	square  = []float32{
 		-0.1, 0.1, 0,
 		-0.1, -0.1, 0, //-0.1, -0.5, 0,
 		0.1, -0.1, 0, //0.1, -0.5, 0,
@@ -57,8 +57,8 @@ type bar struct {
 
 func generateList() []int {
 	rand.Seed(time.Now().UnixNano())
-	size := int(rand.Int31n(700 + 1))
-	//size := 100
+	//size := int(rand.Int31n(1000 + 1))
+	size := 1000
 	numberList := make([]int, size, size)
 	for x := range numberList {
 		numberList[x] = int(rand.Int31n(31 + 1))
@@ -69,6 +69,7 @@ func generateList() []int {
 func main() {
 	//GENERA LA LISTA DE NUMEROS
 	numberList := generateList()
+	columns = len(numberList) + int(float32(len(numberList))*0.05)
 
 	//INICIALIZA CADA ALGORITMO
 
@@ -115,46 +116,51 @@ func main() {
 
 	heapTemp := make([]int, len(numberList), len(numberList))
 	copy(heapTemp, numberList)
-
+	timer := 0
+	//percentage := float32(columns) / 2
 	for !window.ShouldClose() {
 		//t := time.Now()
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		gl.UseProgram(program)
 
-		heapData := <-heapChannel
-		if len(heapData) == 0 {
-			setBars(10.2, heapTemp, true)
-		} else {
-			setBars(10.2, heapData, false)
-			heapTemp = heapData
+		if timer%(columns/2) == 0 {
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			gl.UseProgram(program)
+			fmt.Println(timer)
+			heapData := <-heapChannel
+			if len(heapData) == 0 {
+				setBars(10.2, heapTemp, true)
+			} else {
+				setBars(10.2, heapData, false)
+				heapTemp = heapData
+			}
+
+			insertionData := <-insertionChannel
+			if len(insertionData) == 0 {
+				setBars(6.8, insertionTemp, true)
+			} else {
+				setBars(6.8, insertionData, false)
+				insertionTemp = insertionData
+			}
+
+			bubbleData := <-bubbleChannel
+			if len(bubbleData) == 0 {
+				setBars(3.4, bubbleTemp, true)
+			} else {
+				setBars(3.4, bubbleData, false)
+				bubbleTemp = bubbleData
+			}
+
+			selectionData := <-selectionChannel
+			if len(selectionData) == 0 {
+				setBars(0, selectionTemp, true)
+			} else {
+				setBars(0, selectionData, false)
+				selectionTemp = selectionData
+			}
+			glfw.PollEvents()
+			window.SwapBuffers()
 		}
 
-		// insertionData := <-insertionChannel
-		// if len(insertionData) == 0 {
-		// 	setBars(6.8, insertionTemp, true)
-		// } else {
-		// 	setBars(6.8, insertionData, false)
-		// 	insertionTemp = insertionData
-		// }
-
-		// bubbleData := <-bubbleChannel
-		// if len(bubbleData) == 0 {
-		// 	setBars(3.4, bubbleTemp, true)
-		// } else {
-		// 	setBars(3.4, bubbleData, false)
-		// 	bubbleTemp = bubbleData
-		// }
-
-		selectionData := <-selectionChannel
-		if len(selectionData) == 0 {
-			setBars(0, selectionTemp, true)
-		} else {
-			setBars(0, selectionData, false)
-			selectionTemp = selectionData
-		}
-
-		glfw.PollEvents()
-		window.SwapBuffers()
+		timer++
 
 		//time.Sleep(time.Second/time.Duration(fps) - time.Since(t))
 	}
@@ -201,39 +207,68 @@ func selectionSort(data []int, c chan []int) {
 	}
 	close(c)
 }
+
 func heapSort(data []int, c chan []int) {
-	//heapify(data)
-	for i := len(data) - 1; i > 0; i-- {
-		data[0], data[i] = data[i], data[0]
-		siftDown(data, 0, i)
-		c <- data
+	for i := 0; i < len(data)-2; i++ {
+		for j := len(data[i:])/2 - 1; j >= 0; j-- { //turn this binary tree into a manageable binary tree
+			heapSortA(data[i:], j)
+			c <- data
+		}
 	}
 	close(c)
 }
-func heapify(data []int) {
-	for i := (len(data) - 1) / 2; i >= 0; i-- {
-		siftDown(data, i, len(data))
-	}
-}
-func siftDown(heap []int, lo, hi int) {
-	root := lo
-	for {
-		child := root*2 + 1
-		if child >= hi {
-			break
-		}
-		if child+1 < hi && heap[child] < heap[child+1] {
-			child++
-		}
-		if heap[root] < heap[child] {
-			heap[root], heap[child] = heap[child], heap[root]
-			root = child
-		} else {
-			break
-		}
 
+// heap, which is a complete binary tree. All parent nodes are larger than their child nodes
+func heapSortA(data []int, i int) {
+	child := 2*i + 1
+	if 2*i+2 < len(data) { //If there is a right child and
+		if data[2*i+1] < data[2*i+2] {
+			child = 2*i + 2
+		}
+	}
+	if data[i] > data[child] {
+		return
+	} else {
+		data[i], data[child] = data[child], data[i] //The parent node is smaller than the child node change position
+	}
+	if child <= (len(data)/2 - 1) { // As long as the child's serial number is still // as long as the current child's index continues to be exchanged within all parent node indexes
+		heapSortA(data, child)
 	}
 }
+
+// func heapSort(data []int, c chan []int) {
+// 	heapify(data)
+// 	for i := len(data) - 1; i > 0; i-- {
+// 		data[0], data[i] = data[i], data[0]
+// 		siftDown(data, 0, i)
+// 		c <- data
+// 	}
+// 	close(c)
+// }
+// func heapify(data []int) {
+// 	for i := (len(data) - 1) / 2; i >= 0; i-- {
+// 		siftDown(data, i, len(data))
+// 	}
+// }
+// func siftDown(heap []int, lo, hi int) {
+// 	root := lo
+// 	for {
+// 		child := root*2 + 1
+// 		if child >= hi {
+// 			break
+// 		}
+// 		if child+1 < hi && heap[child] < heap[child+1] {
+// 			child++
+// 		}
+// 		if heap[root] < heap[child] {
+// 			heap[root], heap[child] = heap[child], heap[root]
+// 			root = child
+// 		} else {
+// 			break
+// 		}
+
+// 	}
+// }
 
 func setBars(y float32, data []int, color bool) {
 
@@ -252,11 +287,11 @@ func newCell(x int, y float32, value int, color bool) {
 		var m float32
 		switch i % 3 {
 		case 0:
-			size = 2.0 / float32(columns)
+			size = (2.0 / float32(columns)) / 2
 			position = float32(x) * size
 			m = 0
 		case 1:
-			size = float32(value) / float32(rows)
+			size = (float32(value) / float32(rows)) / 2
 			position = 0
 			m = y / 10
 		default:
@@ -293,7 +328,7 @@ func initGlfw() *glfw.Window {
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
-	window, err := glfw.CreateWindow(width, height, "Conway's Game of Life", nil, nil)
+	window, err := glfw.CreateWindow(width, height, "Sorting Algorithms", nil, nil)
 	if err != nil {
 		panic(err)
 	}
