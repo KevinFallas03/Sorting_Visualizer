@@ -58,7 +58,7 @@ type bar struct {
 func generateList() []int {
 	rand.Seed(time.Now().UnixNano())
 	//size := int(rand.Int31n(1000 + 1))
-	size := 1000
+	size := 10000
 	numberList := make([]int, size, size)
 	for x := range numberList {
 		numberList[x] = int(rand.Int31n(31 + 1))
@@ -119,13 +119,16 @@ func main() {
 	timer := 0
 	//percentage := float32(columns) / 2
 	for !window.ShouldClose() {
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		gl.UseProgram(program)
 		//t := time.Now()
+		heapData := <-heapChannel
+		insertionData := <-insertionChannel
+		bubbleData := <-bubbleChannel
+		selectionData := <-selectionChannel
 
-		if timer%(columns/2) == 0 {
-			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-			gl.UseProgram(program)
-			fmt.Println(timer)
-			heapData := <-heapChannel
+		if timer%10000 == 0 {
+
 			if len(heapData) == 0 {
 				setBars(10.2, heapTemp, true)
 			} else {
@@ -133,7 +136,6 @@ func main() {
 				heapTemp = heapData
 			}
 
-			insertionData := <-insertionChannel
 			if len(insertionData) == 0 {
 				setBars(6.8, insertionTemp, true)
 			} else {
@@ -141,7 +143,6 @@ func main() {
 				insertionTemp = insertionData
 			}
 
-			bubbleData := <-bubbleChannel
 			if len(bubbleData) == 0 {
 				setBars(3.4, bubbleTemp, true)
 			} else {
@@ -149,13 +150,15 @@ func main() {
 				bubbleTemp = bubbleData
 			}
 
-			selectionData := <-selectionChannel
 			if len(selectionData) == 0 {
 				setBars(0, selectionTemp, true)
 			} else {
 				setBars(0, selectionData, false)
 				selectionTemp = selectionData
 			}
+
+			fmt.Println(timer)
+
 			glfw.PollEvents()
 			window.SwapBuffers()
 		}
