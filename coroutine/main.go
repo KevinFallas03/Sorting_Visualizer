@@ -54,11 +54,14 @@ type bar struct {
 	drawable uint32
 	color    bool
 }
+type minheap struct {
+	arr []int
+}
 
 func generateList() []int {
 	rand.Seed(time.Now().UnixNano())
-	//size := int(rand.Int31n(1000 + 1))
-	size := 10000
+	//size := int(rand.Int31n(10000 + 1))
+	size := 50
 	numberList := make([]int, size, size)
 	for x := range numberList {
 		numberList[x] = int(rand.Int31n(31 + 1))
@@ -117,17 +120,17 @@ func main() {
 	heapTemp := make([]int, len(numberList), len(numberList))
 	copy(heapTemp, numberList)
 	timer := 0
-	//percentage := float32(columns) / 2
+	percentage := float32(columns) * 0.03
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.UseProgram(program)
-		//t := time.Now()
+
 		heapData := <-heapChannel
 		insertionData := <-insertionChannel
 		bubbleData := <-bubbleChannel
 		selectionData := <-selectionChannel
 
-		if timer%10000 == 0 {
+		if timer%int(percentage) == 0 {
 
 			if len(heapData) == 0 {
 				setBars(10.2, heapTemp, true)
@@ -156,9 +159,6 @@ func main() {
 				setBars(0, selectionData, false)
 				selectionTemp = selectionData
 			}
-
-			fmt.Println(timer)
-
 			glfw.PollEvents()
 			window.SwapBuffers()
 		}
@@ -170,6 +170,7 @@ func main() {
 }
 
 func insertionSort(data []int, c chan []int) {
+	t := time.Now()
 	for i := 1; i < len(data); i++ {
 		if data[i] < data[i-1] {
 			j := i - 1
@@ -182,10 +183,12 @@ func insertionSort(data []int, c chan []int) {
 			c <- data
 		}
 	}
+	fmt.Println("InsertionSort: ", time.Since(t))
 	close(c)
 }
 
 func bubbleSort(data []int, c chan []int) {
+	t := time.Now()
 	for i := 0; i < len(data); i++ {
 		for j := 1; j < len(data)-i; j++ {
 			if data[j] < data[j-1] {
@@ -194,9 +197,11 @@ func bubbleSort(data []int, c chan []int) {
 			}
 		}
 	}
+	fmt.Println("BubbleSort: ", time.Since(t))
 	close(c)
 }
 func selectionSort(data []int, c chan []int) {
+	t := time.Now()
 	length := len(data)
 	for i := 0; i < length; i++ {
 		maxIndex := 0
@@ -208,77 +213,50 @@ func selectionSort(data []int, c chan []int) {
 		data[length-i-1], data[maxIndex] = data[maxIndex], data[length-i-1]
 		c <- data
 	}
+	fmt.Println("SelectionSort: ", time.Since(t))
 	close(c)
 }
 
 func heapSort(data []int, c chan []int) {
-	for i := 0; i < len(data)-2; i++ {
-		for j := len(data[i:])/2 - 1; j >= 0; j-- { //turn this binary tree into a manageable binary tree
-			heapSortA(data[i:], j)
-			c <- data
-		}
+	t := time.Now()
+	heapify(data)
+	for i := len(data) - 1; i > 0; i-- {
+		data[0], data[i] = data[i], data[0]
+		siftDown(data, 0, i)
+		c <- data
 	}
+	fmt.Println("HeapSort: ", time.Since(t))
 	close(c)
 }
-
-// heap, which is a complete binary tree. All parent nodes are larger than their child nodes
-func heapSortA(data []int, i int) {
-	child := 2*i + 1
-	if 2*i+2 < len(data) { //If there is a right child and
-		if data[2*i+1] < data[2*i+2] {
-			child = 2*i + 2
+func heapify(data []int) {
+	for i := (len(data) - 1) / 2; i >= 0; i-- {
+		siftDown(data, i, len(data))
+	}
+}
+func siftDown(heap []int, lo, hi int) {
+	root := lo
+	for {
+		child := root*2 + 1
+		if child >= hi {
+			break
 		}
-	}
-	if data[i] > data[child] {
-		return
-	} else {
-		data[i], data[child] = data[child], data[i] //The parent node is smaller than the child node change position
-	}
-	if child <= (len(data)/2 - 1) { // As long as the child's serial number is still // as long as the current child's index continues to be exchanged within all parent node indexes
-		heapSortA(data, child)
+		if child+1 < hi && heap[child] < heap[child+1] {
+			child++
+		}
+		if heap[root] < heap[child] {
+			heap[root], heap[child] = heap[child], heap[root]
+			root = child
+		} else {
+			break
+		}
+
 	}
 }
 
-// func heapSort(data []int, c chan []int) {
-// 	heapify(data)
-// 	for i := len(data) - 1; i > 0; i-- {
-// 		data[0], data[i] = data[i], data[0]
-// 		siftDown(data, 0, i)
-// 		c <- data
-// 	}
-// 	close(c)
-// }
-// func heapify(data []int) {
-// 	for i := (len(data) - 1) / 2; i >= 0; i-- {
-// 		siftDown(data, i, len(data))
-// 	}
-// }
-// func siftDown(heap []int, lo, hi int) {
-// 	root := lo
-// 	for {
-// 		child := root*2 + 1
-// 		if child >= hi {
-// 			break
-// 		}
-// 		if child+1 < hi && heap[child] < heap[child+1] {
-// 			child++
-// 		}
-// 		if heap[root] < heap[child] {
-// 			heap[root], heap[child] = heap[child], heap[root]
-// 			root = child
-// 		} else {
-// 			break
-// 		}
-
-// 	}
-// }
-
 func setBars(y float32, data []int, color bool) {
-
 	for i := range data {
 		newCell(i, y, data[i], color)
 	}
-
 }
 func newCell(x int, y float32, value int, color bool) {
 	points := make([]float32, len(square), len(square))
