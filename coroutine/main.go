@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"runtime"
 	"strings"
 	"time"
 
-	"runtime"
+	"./algorithms"
 
-	"github.com/go-gl/gl/v4.1-core/gl" // OR: github.com/go-gl/gl/v2.1/gl
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
@@ -54,9 +55,6 @@ type bar struct {
 	drawable uint32
 	color    bool
 }
-type minheap struct {
-	arr []int
-}
 
 func generateList() []int {
 	rand.Seed(time.Now().UnixNano())
@@ -80,25 +78,25 @@ func main() {
 	bubbleList := make([]int, len(numberList), len(numberList))
 	copy(bubbleList, numberList)
 	bubbleChannel := make(chan []int)
-	go bubbleSort(bubbleList, bubbleChannel)
+	go algorithms.BubbleSort(bubbleList, bubbleChannel)
 
 	//SELECTION
 	selectionList := make([]int, len(numberList), len(numberList))
 	copy(selectionList, numberList)
 	selectionChannel := make(chan []int)
-	go selectionSort(selectionList, selectionChannel)
+	go algorithms.SelectionSort(selectionList, selectionChannel)
 
 	//INSERTION
 	insertionList := make([]int, len(numberList), len(numberList))
 	copy(insertionList, numberList)
 	insertionChannel := make(chan []int)
-	go insertionSort(insertionList, insertionChannel)
+	go algorithms.InsertionSort(insertionList, insertionChannel)
 
 	//HEAP
 	heapList := make([]int, len(numberList), len(numberList))
 	copy(heapList, numberList)
 	heapChannel := make(chan []int)
-	go heapSort(heapList, heapChannel)
+	go algorithms.HeapSort(heapList, heapChannel)
 
 	//MOSTRAR VENTANA
 	runtime.LockOSThread()
@@ -166,90 +164,6 @@ func main() {
 		timer++
 
 		//time.Sleep(time.Second/time.Duration(fps) - time.Since(t))
-	}
-}
-
-func insertionSort(data []int, c chan []int) {
-	t := time.Now()
-	for i := 1; i < len(data); i++ {
-		if data[i] < data[i-1] {
-			j := i - 1
-			temp := data[i]
-			for j >= 0 && data[j] > temp {
-				data[j+1] = data[j]
-				j--
-			}
-			data[j+1] = temp
-			c <- data
-		}
-	}
-	fmt.Println("InsertionSort: ", time.Since(t))
-	close(c)
-}
-
-func bubbleSort(data []int, c chan []int) {
-	t := time.Now()
-	for i := 0; i < len(data); i++ {
-		for j := 1; j < len(data)-i; j++ {
-			if data[j] < data[j-1] {
-				data[j], data[j-1] = data[j-1], data[j]
-				c <- data
-			}
-		}
-	}
-	fmt.Println("BubbleSort: ", time.Since(t))
-	close(c)
-}
-func selectionSort(data []int, c chan []int) {
-	t := time.Now()
-	length := len(data)
-	for i := 0; i < length; i++ {
-		maxIndex := 0
-		for j := 1; j < length-i; j++ {
-			if data[j] > data[maxIndex] {
-				maxIndex = j
-			}
-		}
-		data[length-i-1], data[maxIndex] = data[maxIndex], data[length-i-1]
-		c <- data
-	}
-	fmt.Println("SelectionSort: ", time.Since(t))
-	close(c)
-}
-
-func heapSort(data []int, c chan []int) {
-	t := time.Now()
-	heapify(data)
-	for i := len(data) - 1; i > 0; i-- {
-		data[0], data[i] = data[i], data[0]
-		siftDown(data, 0, i)
-		c <- data
-	}
-	fmt.Println("HeapSort: ", time.Since(t))
-	close(c)
-}
-func heapify(data []int) {
-	for i := (len(data) - 1) / 2; i >= 0; i-- {
-		siftDown(data, i, len(data))
-	}
-}
-func siftDown(heap []int, lo, hi int) {
-	root := lo
-	for {
-		child := root*2 + 1
-		if child >= hi {
-			break
-		}
-		if child+1 < hi && heap[child] < heap[child+1] {
-			child++
-		}
-		if heap[root] < heap[child] {
-			heap[root], heap[child] = heap[child], heap[root]
-			root = child
-		} else {
-			break
-		}
-
 	}
 }
 
