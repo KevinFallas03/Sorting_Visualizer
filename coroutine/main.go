@@ -43,12 +43,12 @@ var (
 	finished = 0
 	square   = []float32{
 		-0.1, 0.1, 0,
-		-0.1, -0.1, 0, //-0.1, -0.5, 0,
-		0.1, -0.1, 0, //0.1, -0.5, 0,
+		-0.1, -0.1, 0,
+		0.1, -0.1, 0,
 
 		-0.1, 0.1, 0,
 		0.1, 0.1, 0,
-		0.1, -0.1, 0, //0.1, -0.5, 0,
+		0.1, -0.1, 0,
 	}
 )
 
@@ -114,9 +114,9 @@ func main() {
 	insertionTemp := numberList
 	heapTemp := numberList
 
+	color := false
 	timer := 0
 	percentage := float32(columns) * 0.03
-
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.UseProgram(program)
@@ -129,21 +129,17 @@ func main() {
 
 		if timer%int(percentage) == 0 {
 
-			data, color := checkStatus(heapData, heapTemp)
-			setBars(10.2, data, color)
-			heapTemp = data
+			heapTemp, color = checkStatus(heapData, heapTemp)
+			setBars(10.2, heapTemp, color)
 
-			data, color = checkStatus(insertionData, insertionTemp)
-			setBars(6.8, data, color)
-			insertionTemp = data
+			insertionTemp, color = checkStatus(insertionData, insertionTemp)
+			setBars(6.8, insertionTemp, color)
 
-			data, color = checkStatus(bubbleData, bubbleTemp)
-			setBars(3.4, data, color)
-			bubbleTemp = data
+			bubbleTemp, color = checkStatus(bubbleData, bubbleTemp)
+			setBars(3.4, bubbleTemp, color)
 
-			data, color = checkStatus(selectionData, selectionTemp)
-			setBars(0, data, color)
-			selectionTemp = data
+			selectionTemp, color = checkStatus(selectionData, selectionTemp)
+			setBars(0, selectionTemp, color)
 
 			glfw.PollEvents()
 			window.SwapBuffers()
@@ -151,6 +147,10 @@ func main() {
 
 		timer++
 	}
+	close(bubbleChannel)
+	close(selectionChannel)
+	close(insertionChannel)
+	close(heapChannel)
 }
 
 // Evalua si lo que retorna el canal es vacio, si lo es retorna la lista
