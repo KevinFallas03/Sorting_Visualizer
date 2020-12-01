@@ -72,31 +72,33 @@ func main() {
 	numberList := generateList()
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
 
-	//INICIALIZA CADA ALGORITMO
+	//INICIALIZA DATOS PARA CADA ALGORITMO
 
 	//BUBBLE
-	bubbleList := make([]int, len(numberList), len(numberList))
-	copy(bubbleList, numberList)
-	bubbleChannel := make(chan []int)
-	go algorithms.BubbleSort(bubbleList, bubbleChannel)
+	bubbleList := make([]int, len(numberList), len(numberList)) //Crea una lista
+	copy(bubbleList, numberList)                                //Llena la lista
+	bubbleChannel := make(chan []int)                           //Crea un canal
 
 	//SELECTION
-	selectionList := make([]int, len(numberList), len(numberList))
-	copy(selectionList, numberList)
-	selectionChannel := make(chan []int)
-	go algorithms.SelectionSort(selectionList, selectionChannel)
+	selectionList := make([]int, len(numberList), len(numberList)) //Crea la lista
+	copy(selectionList, numberList)                                //Llena la lista
+	selectionChannel := make(chan []int)                           //Crea un canal
 
 	//INSERTION
-	insertionList := make([]int, len(numberList), len(numberList))
-	copy(insertionList, numberList)
-	insertionChannel := make(chan []int)
-	go algorithms.InsertionSort(insertionList, insertionChannel)
+	insertionList := make([]int, len(numberList), len(numberList)) //Crea la lista
+	copy(insertionList, numberList)                                //Llena la lista
+	insertionChannel := make(chan []int)                           //Crea un canal
 
 	//HEAP
-	heapList := make([]int, len(numberList), len(numberList))
-	copy(heapList, numberList)
-	heapChannel := make(chan []int)
+	heapList := make([]int, len(numberList), len(numberList)) //Crea la lista
+	copy(heapList, numberList)                                //Llena la lista
+	heapChannel := make(chan []int)                           //Crea un canal
+
+	//INICIA CADA ALGORITMO
 	go algorithms.HeapSort(heapList, heapChannel)
+	go algorithms.InsertionSort(insertionList, insertionChannel)
+	go algorithms.SelectionSort(selectionList, selectionChannel)
+	go algorithms.BubbleSort(bubbleList, bubbleChannel)
 
 	//MOSTRAR VENTANA
 	runtime.LockOSThread()
@@ -117,12 +119,15 @@ func main() {
 
 	heapTemp := make([]int, len(numberList), len(numberList))
 	copy(heapTemp, numberList)
+
 	timer := 0
 	percentage := float32(columns) * 0.03
+
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.UseProgram(program)
 
+		//OBTIENE INFORMACION DE LOS CANALES
 		heapData := <-heapChannel
 		insertionData := <-insertionChannel
 		bubbleData := <-bubbleChannel
@@ -162,17 +167,15 @@ func main() {
 		}
 
 		timer++
-
-		//time.Sleep(time.Second/time.Duration(fps) - time.Since(t))
 	}
 }
 
 func setBars(y float32, data []int, color bool) {
 	for i := range data {
-		newCell(i, y, data[i], color)
+		newBar(i, y, data[i], color)
 	}
 }
-func newCell(x int, y float32, value int, color bool) {
+func newBar(x int, y float32, value int, color bool) {
 	points := make([]float32, len(square), len(square))
 	copy(points, square)
 
