@@ -37,8 +37,8 @@ type bar struct {
 
 func generateList() []int {
 	rand.Seed(time.Now().UnixNano())
-	//size := int(rand.Int31n(10000 + 1))
-	size := 200
+	size := int(rand.Int31n(10000 + 1))
+	//size := 200
 	numberList := make([]int, size, size)
 	for x := range numberList {
 		numberList[x] = int(rand.Int31n(31 + 1))
@@ -52,8 +52,9 @@ func main() {
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
 
 	//GENERA DATA PARA LOS ALGORITMOS
-	var numberLists [][]int      //Lista de listas de numeros
-	var tempLists [][]int        //Lista de listas temporales
+	var numberLists [][]int //Lista de listas de numeros
+	var tempLists [][]int   //Lista de listas temporales
+	var actualLists [][]int
 	var channelList []chan []int //Lista de canales
 	for i := 0; i < 4; i++ {
 		newList := make([]int, len(numberList), len(numberList))
@@ -61,6 +62,7 @@ func main() {
 		numberLists = append(numberLists, newList)
 		channelList = append(channelList, make(chan []int))
 		tempLists = append(tempLists, numberList)
+		actualLists = append(actualLists, numberList)
 	}
 
 	//INICIA CADA ALGORITMO
@@ -78,13 +80,16 @@ func main() {
 	color := false
 	timer := 0
 	percentage := float32(columns) * 0.03
+
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.UseProgram(program)
-
+		for data := 0; data < len(channelList); data++ {
+			actualLists[data] = <-channelList[data]
+		}
 		if timer%int(percentage) == 0 {
 			for data := 0; data < len(channelList); data++ {
-				actualList := <-channelList[data]
+				actualList := actualLists[data]
 				tempLists[data], color = checkStatus(actualList, tempLists[data])
 				setBars(3.4*float32(data), tempLists[data], color)
 			}
