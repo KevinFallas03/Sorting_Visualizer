@@ -39,8 +39,9 @@ const (
 )
 
 var (
-	columns = 0
-	square  = []float32{
+	columns  = 0
+	finished = 0
+	square   = []float32{
 		-0.1, 0.1, 0,
 		-0.1, -0.1, 0, //-0.1, -0.5, 0,
 		0.1, -0.1, 0, //0.1, -0.5, 0,
@@ -108,17 +109,10 @@ func main() {
 	program := initOpenGL()
 
 	//CREA TEMPORALES
-	bubbleTemp := make([]int, len(numberList), len(numberList))
-	copy(bubbleTemp, numberList)
-
-	selectionTemp := make([]int, len(numberList), len(numberList))
-	copy(selectionTemp, numberList)
-
-	insertionTemp := make([]int, len(numberList), len(numberList))
-	copy(insertionTemp, numberList)
-
-	heapTemp := make([]int, len(numberList), len(numberList))
-	copy(heapTemp, numberList)
+	bubbleTemp := numberList
+	selectionTemp := numberList
+	insertionTemp := numberList
+	heapTemp := numberList
 
 	timer := 0
 	percentage := float32(columns) * 0.03
@@ -135,38 +129,40 @@ func main() {
 
 		if timer%int(percentage) == 0 {
 
-			if len(heapData) == 0 {
-				setBars(10.2, heapTemp, true)
-			} else {
-				setBars(10.2, heapData, false)
-				heapTemp = heapData
-			}
+			data, color := checkStatus(heapData, heapTemp)
+			setBars(10.2, data, color)
+			heapTemp = data
 
-			if len(insertionData) == 0 {
-				setBars(6.8, insertionTemp, true)
-			} else {
-				setBars(6.8, insertionData, false)
-				insertionTemp = insertionData
-			}
+			data, color = checkStatus(insertionData, insertionTemp)
+			setBars(6.8, data, color)
+			insertionTemp = data
 
-			if len(bubbleData) == 0 {
-				setBars(3.4, bubbleTemp, true)
-			} else {
-				setBars(3.4, bubbleData, false)
-				bubbleTemp = bubbleData
-			}
+			data, color = checkStatus(bubbleData, bubbleTemp)
+			setBars(3.4, data, color)
+			bubbleTemp = data
 
-			if len(selectionData) == 0 {
-				setBars(0, selectionTemp, true)
-			} else {
-				setBars(0, selectionData, false)
-				selectionTemp = selectionData
-			}
+			data, color = checkStatus(selectionData, selectionTemp)
+			setBars(0, data, color)
+			selectionTemp = data
+
 			glfw.PollEvents()
 			window.SwapBuffers()
 		}
 
 		timer++
+	}
+}
+
+// Evalua si lo que retorna el canal es vacio, si lo es retorna la lista
+// temporal y cambia color, sino retorna la lista del canal y deja el color
+// Parametros:
+// 		channelData = data que viene del canal
+// 		tempData = data que se guardo anteriormente
+func checkStatus(channelData []int, tempData []int) ([]int, bool) {
+	if len(channelData) == 0 {
+		return tempData, true
+	} else {
+		return channelData, false
 	}
 }
 
