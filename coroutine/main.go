@@ -12,34 +12,14 @@ import (
 )
 
 const (
-	width              = 1280
-	height             = 700
-	vertexShaderSource = `
-		#version 410
-		in vec3 vp;
-		void main() {
-			gl_Position = vec4(vp, 1.0);
-		}
-	` + "\x00"
-
-	fragmentShaderSource = `
-		#version 410
-		out vec4 frag_colour;
-		void main() {
-			frag_colour = vec4(1, 1, 1, 1.0);
-		}
-	` + "\x00"
-
-	rows = 200
-
-	threshold = 0.15
-	fps       = 10
+	width  = 1280
+	height = 700
+	rows   = 200
 )
 
 var (
-	columns  = 0
-	finished = 0
-	square   = []float32{
+	columns = 0
+	square  = []float32{
 		-0.1, 0.1, 0,
 		-0.1, -0.1, 0,
 		0.1, -0.1, 0,
@@ -58,7 +38,7 @@ type bar struct {
 func generateList() []int {
 	rand.Seed(time.Now().UnixNano())
 	//size := int(rand.Int31n(10000 + 1))
-	size := 50
+	size := 200
 	numberList := make([]int, size, size)
 	for x := range numberList {
 		numberList[x] = int(rand.Int31n(31 + 1))
@@ -71,46 +51,29 @@ func main() {
 	numberList := generateList()
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
 
-	//INICIALIZA DATOS PARA CADA ALGORITMO
-
-	//BUBBLE
-	bubbleList := make([]int, len(numberList), len(numberList)) //Crea una lista
-	copy(bubbleList, numberList)                                //Llena la lista
-	bubbleChannel := make(chan []int)                           //Crea un canal
-
-	//SELECTION
-	selectionList := make([]int, len(numberList), len(numberList)) //Crea la lista
-	copy(selectionList, numberList)                                //Llena la lista
-	selectionChannel := make(chan []int)                           //Crea un canal
-
-	//INSERTION
-	insertionList := make([]int, len(numberList), len(numberList)) //Crea la lista
-	copy(insertionList, numberList)                                //Llena la lista
-	insertionChannel := make(chan []int)                           //Crea un canal
-
-	//HEAP
-	heapList := make([]int, len(numberList), len(numberList)) //Crea la lista
-	copy(heapList, numberList)                                //Llena la lista
-	heapChannel := make(chan []int)                           //Crea un canal
+	//GENERA DATA PARA LOS ALGORITMOS
+	var numberLists [][]int      //Lista de listas de numeros
+	var tempLists [][]int        //Lista de listas temporales
+	var channelList []chan []int //Lista de canales
+	for i := 0; i < 4; i++ {
+		newList := make([]int, len(numberList), len(numberList))
+		copy(newList, numberList)
+		numberLists = append(numberLists, newList)
+		channelList = append(channelList, make(chan []int))
+		tempLists = append(tempLists, numberList)
+	}
 
 	//INICIA CADA ALGORITMO
-	go algorithms.HeapSort(heapList, heapChannel)
-	go algorithms.InsertionSort(insertionList, insertionChannel)
-	go algorithms.SelectionSort(selectionList, selectionChannel)
-	go algorithms.BubbleSort(bubbleList, bubbleChannel)
+	go algorithms.HeapSort(numberLists[0], channelList[0])
+	go algorithms.InsertionSort(numberLists[1], channelList[1])
+	go algorithms.SelectionSort(numberLists[2], channelList[2])
+	go algorithms.BubbleSort(numberLists[3], channelList[3])
 
 	//MOSTRAR VENTANA
 	runtime.LockOSThread()
-
 	window := initGlfw()
 	defer glfw.Terminate()
 	program := initOpenGL()
-
-	//CREA TEMPORALES
-	bubbleTemp := numberList
-	selectionTemp := numberList
-	insertionTemp := numberList
-	heapTemp := numberList
 
 	color := false
 	timer := 0
@@ -119,40 +82,23 @@ func main() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.UseProgram(program)
 
-		//OBTIENE INFORMACION DE LOS CANALES
-		heapData := <-heapChannel
-		insertionData := <-insertionChannel
-		bubbleData := <-bubbleChannel
-		selectionData := <-selectionChannel
-
 		if timer%int(percentage) == 0 {
-
-			heapTemp, color = checkStatus(heapData, heapTemp)
-			setBars(10.2, heapTemp, color)
-
-			insertionTemp, color = checkStatus(insertionData, insertionTemp)
-			setBars(6.8, insertionTemp, color)
-
-			bubbleTemp, color = checkStatus(bubbleData, bubbleTemp)
-			setBars(3.4, bubbleTemp, color)
-
-			selectionTemp, color = checkStatus(selectionData, selectionTemp)
-			setBars(0, selectionTemp, color)
-
+			for data := 0; data < len(channelList); data++ {
+				actualList := <-channelList[data]
+				tempLists[data], color = checkStatus(actualList, tempLists[data])
+				setBars(3.4*float32(data), tempLists[data], color)
+			}
 			glfw.PollEvents()
 			window.SwapBuffers()
 		}
-
 		timer++
 	}
-	close(bubbleChannel)
-	close(selectionChannel)
-	close(insertionChannel)
-	close(heapChannel)
+	for data := 0; data < len(channelList); data++ {
+		close(channelList[data])
+	}
 }
 
-// Evalua si lo que retorna el canal es vacio, si lo es retorna la lista
-// temporal y cambia color, sino retorna la lista del canal y deja el color
+// Evalua si lo que retorna el canal es vacio
 // Parametros:
 // 		channelData = data que viene del canal
 // 		tempData = data que se guardo anteriormente
@@ -186,9 +132,7 @@ func newBar(x int, y float32, value int, color bool) {
 	copy(points, square)
 
 	for i := 0; i < len(points); i++ {
-		var position float32
-		var size float32
-		var m float32
+		var position, size, m float32
 		switch i % 3 {
 		case 0:
 			size = (2.0 / float32(columns)) / 2
@@ -239,7 +183,6 @@ func initGlfw() *glfw.Window {
 		panic(err)
 	}
 	window.MakeContextCurrent()
-
 	return window
 }
 
