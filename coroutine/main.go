@@ -52,9 +52,9 @@ func main() {
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
 
 	//GENERA DATA PARA LOS ALGORITMOS
-	var numberLists [][]int //Lista de listas de numeros
-	var tempLists [][]int   //Lista de listas temporales
-	var actualLists [][]int
+	var numberLists [][]int      //Lista de listas de numeros
+	var tempLists [][]int        //Lista de listas temporales
+	var actualLists [][]int      //Lista de listas actualizadas
 	var channelList []chan []int //Lista de canales
 	for i := 0; i < 4; i++ {
 		newList := make([]int, len(numberList), len(numberList))
@@ -84,13 +84,16 @@ func main() {
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.UseProgram(program)
+
+		//OBTIENE INFORMACION DE LOS CANALES
 		for data := 0; data < len(channelList); data++ {
 			actualLists[data] = <-channelList[data]
 		}
+
+		//CADA CIERTO TIEMPO PINTA
 		if timer%int(percentage) == 0 {
 			for data := 0; data < len(channelList); data++ {
-				actualList := actualLists[data]
-				tempLists[data], color = checkStatus(actualList, tempLists[data])
+				tempLists[data], color = checkStatus(actualLists[data], tempLists[data])
 				setBars(3.4*float32(data), tempLists[data], color)
 			}
 			glfw.PollEvents()
