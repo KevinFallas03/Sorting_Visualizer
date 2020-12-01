@@ -170,11 +170,23 @@ func main() {
 	}
 }
 
+// Recorre la lista de numeros y por cada numero crea una nueva barra
+// Parametros:
+//		y = posicion en el eje y
+//  	data = lista de enteros
+//		color = bandera para saber si ya termino para pintarlo de otro color
 func setBars(y float32, data []int, color bool) {
-	for i := range data {
-		newBar(i, y, data[i], color)
+	for x := range data {
+		newBar(x, y, data[x], color)
 	}
 }
+
+// Crea una barra con el valor entrante
+// Parametros:
+// 		x = posicion en el eje x
+// 		y = posicion en el eje y
+// 		value = numero que representa la barra
+// 		color = bandera para saber si ya termino para pintarlo de otro color`
 func newBar(x int, y float32, value int, color bool) {
 	points := make([]float32, len(square), len(square))
 	copy(points, square)
@@ -209,13 +221,15 @@ func newBar(x int, y float32, value int, color bool) {
 	}
 	bar.draw()
 }
+
+// Funcion de la estructura bar para poder dibujar
 func (c *bar) draw() {
 	gl.ColorMask(true, c.color, false, false)
 	gl.BindVertexArray(c.drawable)
 	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
 }
 
-// initGlfw initializes glfw and returns a Window to use.
+// initGlfw inicializa glfw y retorna Window para usarla
 func initGlfw() *glfw.Window {
 	if err := glfw.Init(); err != nil {
 		panic(err)
@@ -235,13 +249,11 @@ func initGlfw() *glfw.Window {
 	return window
 }
 
-// initOpenGL initializes OpenGL and returns an intiialized program.
+// initOpenGL inicializa OpenGL y retorna un programa inicializado
 func initOpenGL() uint32 {
 	if err := gl.Init(); err != nil {
 		panic(err)
 	}
-	// version := gl.GoStr(gl.GetString(gl.VERSION))
-	// log.Println("OpenGL version", version)
 
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
@@ -260,7 +272,9 @@ func initOpenGL() uint32 {
 	return prog
 }
 
-// makeVao initializes and returns a vertex array from the points provided.
+// makeVao inicializa y retorna un vertex array con los puntos de parametro
+// Parametros:
+// 		points = lista de numeros flotantes
 func makeVao(points []float32) uint32 {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
@@ -276,6 +290,7 @@ func makeVao(points []float32) uint32 {
 
 	return vao
 }
+
 func compileShader(source string, shaderType uint32) (uint32, error) {
 	shader := gl.CreateShader(shaderType)
 
@@ -298,113 +313,3 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 
 	return shader, nil
 }
-
-// const (
-// 	width  = 500
-// 	height = 500
-// )
-
-// func generateList() []int {
-// 	rand.Seed(time.Now().UnixNano())
-// 	size := int(rand.Int31n(100 + 1))
-// 	numberList := make([]int, size, size)
-// 	for x := range numberList {
-// 		numberList[x] = int(rand.Int31n(31 + 1))
-// 	}
-// 	return numberList
-// }
-
-// func main() {
-// 	c := make(chan []int)
-// 	m := generateList()
-// 	list1 := make([]int, len(m), len(m))
-// 	copy(list1, m)
-// 	go selectionSort(list1, c)
-
-// 	runtime.LockOSThread()
-
-// 	// list2 := make([]int, len(m), len(m))
-// 	// copy(list2,m)
-// 	// go insertionSort(list2)
-
-// 	window := initGlfw()
-// 	defer glfw.Terminate()
-// 	program := initOpenGL()
-
-// 	for !window.ShouldClose() {
-// 		x := <-c // receive from c
-// 		fmt.Println(x)
-// 		draw(window, program)
-// 	}
-
-// }
-// func draw(window *glfw.Window, program uint32) {
-// 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-// 	gl.UseProgram(program)
-
-// 	glfw.PollEvents()
-// 	window.SwapBuffers()
-// }
-
-// // initGlfw initializes glfw and returns a Window to use.
-// func initGlfw() *glfw.Window {
-// 	if err := glfw.Init(); err != nil {
-// 		panic(err)
-// 	}
-
-// 	glfw.WindowHint(glfw.Resizable, glfw.False)
-// 	glfw.WindowHint(glfw.ContextVersionMajor, 4) // OR 2
-// 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
-// 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-// 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-
-// 	window, err := glfw.CreateWindow(width, height, "Conway's Game of Life", nil, nil)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	window.MakeContextCurrent()
-
-// 	return window
-// }
-
-// // initOpenGL initializes OpenGL and returns an intiialized program.
-// func initOpenGL() uint32 {
-// 	if err := gl.Init(); err != nil {
-// 		panic(err)
-// 	}
-// 	version := gl.GoStr(gl.GetString(gl.VERSION))
-// 	log.Println("OpenGL version", version)
-
-// 	prog := gl.CreateProgram()
-// 	gl.LinkProgram(prog)
-// 	return prog
-// }
-
-// func selectionSort(data []int, c chan []int) {
-// 	length := len(data)
-// 	for i := 0; i < length; i++ {
-// 		maxIndex := 0
-// 		for j := 1; j < length-i; j++ {
-// 			if data[j] > data[maxIndex] {
-// 				maxIndex = j
-// 			}
-// 		}
-// 		data[length-i-1], data[maxIndex] = data[maxIndex], data[length-i-1]
-// 		c <- data
-// 	}
-// }
-// func insertionSort(data []int) []int {
-// 	for i := 1; i < len(data); i++ {
-// 		if data[i] < data[i-1] {
-// 			j := i - 1
-// 			temp := data[i]
-// 			for j >= 0 && data[j] > temp {
-// 				data[j+1] = data[j]
-// 				j--
-// 			}
-// 			data[j+1] = temp
-// 			fmt.Println("Insertion: ", data)
-// 		}
-// 	}
-// 	return data
-// }
