@@ -56,7 +56,7 @@ func main() {
 	var tempLists [][]int        //Lista de listas temporales
 	var actualLists [][]int      //Lista de listas actualizadas
 	var channelList []chan []int //Lista de canales
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 5; i++ {
 		newList := make([]int, len(numberList), len(numberList))
 		copy(newList, numberList)
 		numberLists = append(numberLists, newList)
@@ -70,6 +70,8 @@ func main() {
 	go algorithms.InsertionSort(numberLists[1], channelList[1])
 	go algorithms.SelectionSort(numberLists[2], channelList[2])
 	go algorithms.BubbleSort(numberLists[3], channelList[3])
+	go algorithms.QuickSort(numberLists[4], channelList[4])
+
 
 	//MOSTRAR VENTANA
 	runtime.LockOSThread()
