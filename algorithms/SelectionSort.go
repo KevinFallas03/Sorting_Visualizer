@@ -6,7 +6,7 @@ import (
 )
 
 //SelectionSort ...
-func SelectionSort(data []int, c chan []int) {
+func SelectionSort(data []int, c chan []int,stopCh chan struct{}) {
 	t := time.Now()
 	length := len(data)
 	for i := 0; i < length; i++ {
@@ -17,7 +17,12 @@ func SelectionSort(data []int, c chan []int) {
 			}
 		}
 		data[length-i-1], data[maxIndex] = data[maxIndex], data[length-i-1]
-		c <- data
+		select {
+			case <-stopCh:
+				close(c)
+				return
+			case c <- data:
+		}
 	}
 	fmt.Println("SelectionSort: ", time.Since(t))
 	close(c)

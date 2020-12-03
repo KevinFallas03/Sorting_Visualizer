@@ -71,10 +71,10 @@ func Start(n int, x int, m int) {
 
 	//INICIA CADA ALGORITMO
 	go algorithms.HeapSort(numberLists[0], channelList[0],stopCh)
-	go algorithms.InsertionSort(numberLists[1], channelList[1])
-	go algorithms.SelectionSort(numberLists[2], channelList[2])
+	go algorithms.InsertionSort(numberLists[1], channelList[1],stopCh)
+	go algorithms.SelectionSort(numberLists[2], channelList[2],stopCh)
 	go algorithms.BubbleSort(numberLists[3], channelList[3],stopCh)
-	go algorithms.QuickSort(numberLists[4], channelList[4])
+	go algorithms.QuickSort(numberLists[4], channelList[4],stopCh)
 
 	//MOSTRAR VENTANA
 	runtime.LockOSThread()

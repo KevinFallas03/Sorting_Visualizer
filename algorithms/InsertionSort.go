@@ -6,7 +6,7 @@ import (
 )
 
 //InsertionSort ...
-func InsertionSort(data []int, c chan []int) {
+func InsertionSort(data []int, c chan []int,stopCh chan struct{}) {
 	t := time.Now()
 	for i := 1; i < len(data); i++ {
 		if data[i] < data[i-1] {
@@ -17,7 +17,12 @@ func InsertionSort(data []int, c chan []int) {
 				j--
 			}
 			data[j+1] = temp
-			c <- data
+			select {
+				case <-stopCh:
+					close(c)
+					return
+				case c <- data:
+			}
 		}
 	}
 	fmt.Println("InsertionSort: ", time.Since(t))
