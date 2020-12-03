@@ -1,4 +1,4 @@
-package main
+package visualizer
 
 import (
 	"math/rand"
@@ -46,7 +46,7 @@ func generateList() []int {
 	return numberList
 }
 
-func main() {
+func start() {
 	//GENERA LA LISTA DE NUMEROS
 	numberList := generateList()
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
