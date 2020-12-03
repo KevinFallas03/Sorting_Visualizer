@@ -59,8 +59,9 @@ func Start(n int, x int, m int,msgCh chan string) {
 	var tempLists [][]int        //Lista de listas temporales
 	var actualLists [][]int      //Lista de listas actualizadas
 	var channelList []chan []int //Lista de canales
-	stopCh := make(chan struct{}) 
+	stopCh := make(chan struct{})//Canal para detener todo 
 
+	//INICIALIZA TODOS LOS DATOS
 	for i := 0; i < 5; i++ {
 		newList := make([]int, len(numberList), len(numberList))
 		copy(newList, numberList)
@@ -107,8 +108,8 @@ func Start(n int, x int, m int,msgCh chan string) {
 		}
 		timer++
 	}
-	close(stopCh)
-	close(msgCh)
+	close(stopCh) 	//Cerrando este canal cerramos los demas canales en cada algoritmo
+	close(msgCh)	//Cerramos el canal de mensajes
 	// for data := 0; data < len(channelList); data++ {
 	// 	close(channelList[data])
 	// }
@@ -142,7 +143,7 @@ func setBars(y float32, data []int, color bool) {
 // 		x = posicion en el eje x
 // 		y = posicion en el eje y
 // 		value = numero que representa la barra
-// 		color = bandera para saber si ya termino para pintarlo de otro color`
+// 		color = bandera para saber si ya termino para pintarlo de otro color
 func newBar(x int, y float32, value int, color bool) {
 	points := make([]float32, len(square), len(square))
 	copy(points, square)

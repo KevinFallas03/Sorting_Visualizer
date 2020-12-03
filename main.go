@@ -120,8 +120,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	go rollText(ctx, rollingSD)
-
+	go rollText(ctx, rollingSD) //Gorrutina para movel el titulo 
 
 	//TEXT BOX
 	wrapped, err := text.New(text.WrapAtRunes())
@@ -131,7 +130,6 @@ func main() {
 	if err := wrapped.Write("1. BubbleSort.\n2. HeapSort.\n3. SelectionSort.\n4. InsertionSort\n5. QuickSort.\n\nTiempos:\n"); err != nil {
 		panic(err)
 	}
-	
 
 	//ENTRY BOXES
 	input, err := createInput("Semilla:")
@@ -151,12 +149,11 @@ func main() {
 	EmpezarB, err := button.New("Empezar", func() error {
 		var intLen,intPeriod,intSeed int
 		primos := map[int]int{
-			11: 11, 13: 13, 17: 17, 19: 19,
-			23: 23, 29: 29, 31: 31, 37: 37,
-			41: 41, 43: 43, 47: 47, 53: 53,
-			59: 59, 61: 61, 67: 67, 71: 71,
-			73: 73, 79: 79, 83: 83, 89: 89,
-			97: 97,101: 101,
+			11: 11, 13: 13, 17: 17, 19: 19, 23: 23, 
+			29: 29, 31: 31, 37: 37, 41: 41, 43: 43,
+			47: 47, 53: 53, 59: 59, 61: 61, 67: 67,
+			71: 71, 73: 73, 79: 79, 83: 83, 89: 89,
+			97: 97, 101: 101,
 		}
 		//Valida tamanno mayor a 0
 		len := input3.ReadAndClear()
@@ -178,8 +175,9 @@ func main() {
 		if primos[intSeed] != intSeed{
 			return nil
 		}
-		messageCh := make(chan string)
-		go writeLines(ctx, wrapped, messageCh)
+
+		messageCh := make(chan string) //Canal para recibir los tiempos 
+		go writeLines(ctx, wrapped, messageCh)	//Gorrutina para mostrar los tiempos
 		visualizer.Start(intLen, intSeed, intPeriod, messageCh)
 		//cancel()
 		return nil
@@ -203,6 +201,7 @@ func main() {
 	}
 
 	builder := grid.New()
+	//Espacio para el titulo 
 	builder.Add(
 		grid.RowHeightPerc(40,
 			grid.Widget(
@@ -210,6 +209,7 @@ func main() {
 			),
 		),
 	)
+	//Espacio para los inputs
 	builder.Add(
 		grid.RowHeightPerc(20,
 			grid.ColWidthPerc(20),
@@ -240,7 +240,7 @@ func main() {
 			grid.ColWidthPerc(20),
 		),
 	)
-
+	//Espacio para los botones y el cuadro de texto
 	builder.Add(
 		grid.RowHeightPerc(40,
 			grid.ColWidthPerc(20),
@@ -281,6 +281,7 @@ func main() {
 		panic(err)
 	}
 }
+//Funciona que crea botones con el texto que le entra como parametro
 func createInput(message string) (*textinput.TextInput, error) {
 	input, err := textinput.New(
 		textinput.Label(message, cell.FgColor(cell.ColorNumber(33))),
