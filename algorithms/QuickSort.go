@@ -4,14 +4,18 @@ import (
 	"fmt"
 	"time"
 )
+var closed bool
 
 // QUICKSORT CON PIVOTE ALEATORIO
 func QuickSort(data []int, c chan []int,stopCh chan struct{}) {
 	t := time.Now()
+	closed = false
 	m := QuickSortAux(data, c, stopCh)
-	c <- m
+	if !closed{
+		c <- m
+		close(c)
+	}
 	fmt.Println("QuickSort: ", time.Since(t))
-	close(c)
 }
 
 // QuickSortAux ...
@@ -35,11 +39,14 @@ func QuickSortAux(data []int, c chan []int, stopCh chan struct{}) []int {
 		}
 		slice5 := append(QuickSortAux(less, c, stopCh), equals...)
 		slice6 = append(slice5, QuickSortAux(greater, c, stopCh)...)
-		select {
-			case <-stopCh:
-				close(c)
-				return data
-			case c <- slice6:
+		if !closed{
+			select {
+				case <-stopCh:
+					close(c)
+					closed = true
+					return data
+				case c <- slice6:
+			}
 		}
 		return slice6
 	} else {
