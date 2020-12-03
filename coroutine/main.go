@@ -37,8 +37,8 @@ type bar struct {
 
 func generateList() []int {
 	rand.Seed(time.Now().UnixNano())
-	size := int(rand.Int31n(10000 + 1))
-	//size := 200
+	//size := int(rand.Int31n(10000 + 1))
+	size := 1000
 	numberList := make([]int, size, size)
 	for x := range numberList {
 		numberList[x] = int(rand.Int31n(31 + 1))
@@ -72,7 +72,6 @@ func main() {
 	go algorithms.BubbleSort(numberLists[3], channelList[3])
 	go algorithms.QuickSort(numberLists[4], channelList[4])
 
-
 	//MOSTRAR VENTANA
 	runtime.LockOSThread()
 	window := initGlfw()
@@ -81,7 +80,7 @@ func main() {
 
 	color := false
 	timer := 0
-	percentage := float32(columns) * 0.03
+	percentage := float32(columns) * 0.01
 
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
