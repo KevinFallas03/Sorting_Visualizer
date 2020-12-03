@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"strconv"
+	//"math/rand"
 	"time"
+	"fmt"
 
 	"github.com/mum4k/termdash"
 	"github.com/mum4k/termdash/align"
@@ -16,9 +18,29 @@ import (
 	"github.com/mum4k/termdash/widgets/button"
 	"github.com/mum4k/termdash/widgets/segmentdisplay"
 	"github.com/mum4k/termdash/widgets/textinput"
+	//"github.com/mum4k/termdash/terminal/terminalapi"
+	"github.com/mum4k/termdash/widgets/text"
 	"./visualizer"
 )
-
+func writeLines(ctx context.Context, t *text.Text, msgCh chan string) {
+	for {
+		select {
+		case msg := <-msgCh:
+			if msg == ""{
+				if err := t.Write(fmt.Sprintf("%s\n", "\n")); err != nil {
+					panic(err)
+				}
+				return
+			}else{
+				if err := t.Write(fmt.Sprintf("%s\n", msg)); err != nil {
+					panic(err)
+				}
+			}
+		case <-ctx.Done():
+			return
+		}
+	}
+}
 func rotate(inputs []rune, step int) []rune {
 	return append(inputs[step:], inputs[:step]...)
 }
@@ -84,6 +106,7 @@ func rollText(ctx context.Context, sd *segmentdisplay.SegmentDisplay) {
 }
 
 func main() {
+	
 	t, err := tcell.New()
 	if err != nil {
 		panic(err)
@@ -99,6 +122,18 @@ func main() {
 	}
 	go rollText(ctx, rollingSD)
 
+
+	//TEXT BOX
+	wrapped, err := text.New(text.WrapAtRunes())
+	if err != nil {
+		panic(err)
+	}
+	if err := wrapped.Write("1. BubbleSort.\n2. HeapSort.\n3. SelectionSort.\n4. InsertionSort\n5. QuickSort.\n\nTiempos:\n"); err != nil {
+		panic(err)
+	}
+	
+
+	//ENTRY BOXES
 	input, err := createInput("Semilla:")
 	if err != nil {
 		panic(err)
@@ -112,6 +147,7 @@ func main() {
 		panic(err)
 	}
 
+	//BUTTONS
 	EmpezarB, err := button.New("Empezar", func() error {
 		var intLen,intPeriod,intSeed int
 		primos := map[int]int{
@@ -142,8 +178,9 @@ func main() {
 		if primos[intSeed] != intSeed{
 			return nil
 		}
-		
-		visualizer.Start(intLen, intSeed, intPeriod)
+		messageCh := make(chan string)
+		go writeLines(ctx, wrapped, messageCh)
+		visualizer.Start(intLen, intSeed, intPeriod, messageCh)
 		//cancel()
 		return nil
 	},
@@ -221,7 +258,13 @@ func main() {
 					container.AlignHorizontal(align.HorizontalLeft),
 				),
 			),
-			grid.ColWidthPerc(20),
+			grid.ColWidthPerc(20,
+				grid.Widget(
+					wrapped,
+					container.AlignVertical(align.VerticalTop),
+					container.AlignHorizontal(align.HorizontalLeft),
+				),
+			),
 		),
 	)
 

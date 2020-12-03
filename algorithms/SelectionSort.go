@@ -1,12 +1,12 @@
 package algorithms
 
 import (
-	"fmt"
+	//"fmt"
 	"time"
 )
 
 //SelectionSort ...
-func SelectionSort(data []int, c chan []int,stopCh chan struct{}) {
+func SelectionSort(data []int, c chan []int,stopCh chan struct{},msgCh chan string) {
 	t := time.Now()
 	length := len(data)
 	for i := 0; i < length; i++ {
@@ -24,6 +24,7 @@ func SelectionSort(data []int, c chan []int,stopCh chan struct{}) {
 			case c <- data:
 		}
 	}
-	fmt.Println("SelectionSort: ", time.Since(t))
+	msgCh <- "SelectionSort: "+time.Since(t).String()
+	//fmt.Println("SelectionSort: ", time.Since(t))
 	close(c)
 }

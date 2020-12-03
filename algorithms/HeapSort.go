@@ -1,12 +1,12 @@
 package algorithms
 
 import (
-	"fmt"
+	//"fmt"
 	"time"
 )
 
 //HeapSort ...
-func HeapSort(data []int, c chan []int,stopCh chan struct{}) {
+func HeapSort(data []int, c chan []int,stopCh chan struct{}, msgCh chan string) {
 	t := time.Now()
 	heapify(data)
 	for i := len(data) - 1; i > 0; i-- {
@@ -19,7 +19,8 @@ func HeapSort(data []int, c chan []int,stopCh chan struct{}) {
 			case c <- data:
 		}
 	}
-	fmt.Println("HeapSort: ", time.Since(t))
+	msgCh <- "HeapSort: "+time.Since(t).String()
+	//fmt.Println("HeapSort: ", time.Since(t))
 	close(c)
 }
 func heapify(data []int) {

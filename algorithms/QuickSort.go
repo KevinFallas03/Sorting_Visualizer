@@ -1,25 +1,27 @@
 package algorithms
 
 import (
-	"fmt"
+	//"fmt"
 	"time"
 )
 var closed bool
 
 // QUICKSORT CON PIVOTE ALEATORIO
-func QuickSort(data []int, c chan []int,stopCh chan struct{}) {
+func QuickSort(data []int, c chan []int,stopCh chan struct{}, msgCh chan string) {
 	t := time.Now()
 	closed = false
-	m := QuickSortAux(data, c, stopCh)
+	m := QuickSortAux(data, c, stopCh,msgCh)
 	if !closed{
 		c <- m
 		close(c)
+		msgCh <- "QuickSort: "+time.Since(t).String()
 	}
-	fmt.Println("QuickSort: ", time.Since(t))
+
+	//fmt.Println("QuickSort: ", time.Since(t))
 }
 
 // QuickSortAux ...
-func QuickSortAux(data []int, c chan []int, stopCh chan struct{}) []int {
+func QuickSortAux(data []int, c chan []int, stopCh chan struct{},msgCh chan string) []int {
 
 	var less []int
 	var equals []int
@@ -37,8 +39,8 @@ func QuickSortAux(data []int, c chan []int, stopCh chan struct{}) []int {
 				greater = append(greater, data[i])
 			}
 		}
-		slice5 := append(QuickSortAux(less, c, stopCh), equals...)
-		slice6 = append(slice5, QuickSortAux(greater, c, stopCh)...)
+		slice5 := append(QuickSortAux(less, c, stopCh, msgCh), equals...)
+		slice6 = append(slice5, QuickSortAux(greater, c, stopCh,msgCh)...)
 		if !closed{
 			select {
 				case <-stopCh:

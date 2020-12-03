@@ -49,7 +49,7 @@ func generateList(n int, x int, m int) []int {
 	return nums
 }
 
-func Start(n int, x int, m int) {
+func Start(n int, x int, m int,msgCh chan string) {
 	//GENERA LA LISTA DE NUMEROS
 	numberList := generateList(n, x, m)
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
@@ -60,6 +60,7 @@ func Start(n int, x int, m int) {
 	var actualLists [][]int      //Lista de listas actualizadas
 	var channelList []chan []int //Lista de canales
 	stopCh := make(chan struct{}) 
+
 	for i := 0; i < 5; i++ {
 		newList := make([]int, len(numberList), len(numberList))
 		copy(newList, numberList)
@@ -70,11 +71,11 @@ func Start(n int, x int, m int) {
 	}
 
 	//INICIA CADA ALGORITMO
-	go algorithms.HeapSort(numberLists[0], channelList[0],stopCh)
-	go algorithms.InsertionSort(numberLists[1], channelList[1],stopCh)
-	go algorithms.SelectionSort(numberLists[2], channelList[2],stopCh)
-	go algorithms.BubbleSort(numberLists[3], channelList[3],stopCh)
-	go algorithms.QuickSort(numberLists[4], channelList[4],stopCh)
+	go algorithms.HeapSort(numberLists[0], channelList[0],stopCh,msgCh)
+	go algorithms.InsertionSort(numberLists[1], channelList[1],stopCh,msgCh)
+	go algorithms.SelectionSort(numberLists[2], channelList[2],stopCh,msgCh)
+	go algorithms.BubbleSort(numberLists[3], channelList[3],stopCh,msgCh)
+	go algorithms.QuickSort(numberLists[4], channelList[4],stopCh,msgCh)
 
 	//MOSTRAR VENTANA
 	runtime.LockOSThread()
@@ -107,6 +108,7 @@ func Start(n int, x int, m int) {
 		timer++
 	}
 	close(stopCh)
+	close(msgCh)
 	// for data := 0; data < len(channelList); data++ {
 	// 	close(channelList[data])
 	// }

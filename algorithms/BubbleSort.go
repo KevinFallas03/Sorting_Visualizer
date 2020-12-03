@@ -1,12 +1,12 @@
 package algorithms
 
 import (
-	"fmt"
+	//"fmt"
 	"time"
 )
 
 //BubbleSort ...
-func BubbleSort(data []int, c chan []int, stopCh chan struct{}) {
+func BubbleSort(data []int, c chan []int, stopCh chan struct{}, msgCh chan string) {
 	t := time.Now()
 	for i := 0; i < len(data); i++ {
 		for j := 1; j < len(data)-i; j++ {
@@ -22,6 +22,7 @@ func BubbleSort(data []int, c chan []int, stopCh chan struct{}) {
 			}
 		}
 	}
-	fmt.Println("BubbleSort: ", time.Since(t))
+	msgCh <- "BubbleSort: "+time.Since(t).String()
+	//fmt.Println("BubbleSort: ", time.Since(t))
 	close(c)
 }
