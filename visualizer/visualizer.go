@@ -87,7 +87,9 @@ func Start(n int, x int, m int,msgCh chan string) {
 	color := false
 	timer := 0
 	percentage := float32(columns) * 0.01
-
+	if percentage == 0{
+		percentage = 1
+	}
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.UseProgram(program)
