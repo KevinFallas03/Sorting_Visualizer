@@ -1,11 +1,8 @@
 package visualizer
 
 import (
-	"math/rand"
 	"runtime"
-	"time"
-
-	"./algorithms"
+	"../algorithms"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -35,20 +32,26 @@ type bar struct {
 	color    bool
 }
 
-func generateList() []int {
-	rand.Seed(time.Now().UnixNano())
-	//size := int(rand.Int31n(10000 + 1))
-	size := 1000
-	numberList := make([]int, size, size)
-	for x := range numberList {
-		numberList[x] = int(rand.Int31n(31 + 1))
+func generateList(n int, x int, m int) []int {
+
+	//  x es la semilla. Debe de ser primo entre [11, 101]  0 <= x < m
+	//  n es la cantidad.
+	//  1103515245, 12345,
+	// var m int = 2048       // >= 2048   Periodo
+	var a int = 1103515245 //    0 < a < m multiplicador
+	var c int = 12345      //      0 <= c < m  Incremento
+
+	var nums []int
+	for i := 0; i < n; i++ {
+		x = (a*x + c) % m
+		nums = append(nums, x%31)
 	}
-	return numberList
+	return nums
 }
 
-func start() {
+func Start(n int, x int, m int) {
 	//GENERA LA LISTA DE NUMEROS
-	numberList := generateList()
+	numberList := generateList(n, x, m)
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
 
 	//GENERA DATA PARA LOS ALGORITMOS
@@ -56,6 +59,7 @@ func start() {
 	var tempLists [][]int        //Lista de listas temporales
 	var actualLists [][]int      //Lista de listas actualizadas
 	var channelList []chan []int //Lista de canales
+	stopCh := make(chan struct{}) 
 	for i := 0; i < 5; i++ {
 		newList := make([]int, len(numberList), len(numberList))
 		copy(newList, numberList)
@@ -66,10 +70,10 @@ func start() {
 	}
 
 	//INICIA CADA ALGORITMO
-	go algorithms.HeapSort(numberLists[0], channelList[0])
+	go algorithms.HeapSort(numberLists[0], channelList[0],stopCh)
 	go algorithms.InsertionSort(numberLists[1], channelList[1])
 	go algorithms.SelectionSort(numberLists[2], channelList[2])
-	go algorithms.BubbleSort(numberLists[3], channelList[3])
+	go algorithms.BubbleSort(numberLists[3], channelList[3],stopCh)
 	go algorithms.QuickSort(numberLists[4], channelList[4])
 
 	//MOSTRAR VENTANA
@@ -102,9 +106,10 @@ func start() {
 		}
 		timer++
 	}
-	for data := 0; data < len(channelList); data++ {
-		close(channelList[data])
-	}
+	close(stopCh)
+	// for data := 0; data < len(channelList); data++ {
+	// 	close(channelList[data])
+	// }
 }
 
 // Evalua si lo que retorna el canal es vacio

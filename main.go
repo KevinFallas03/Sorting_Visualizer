@@ -31,6 +31,7 @@ import (
 	"github.com/mum4k/termdash/widgets/button"
 	"github.com/mum4k/termdash/widgets/segmentdisplay"
 	"github.com/mum4k/termdash/widgets/textinput"
+	"./visualizer"
 )
 
 func rotate(inputs []rune, step int) []rune {
@@ -127,14 +128,38 @@ func main() {
 	}
 
 	EmpezarB, err := button.New("Empezar", func() error {
-		seed := input.ReadAndClear()
-		period := input2.ReadAndClear()
+		var intLen,intPeriod,intSeed int
+		primos := map[int]int{
+			11: 11, 13: 13, 17: 17, 19: 19,
+			23: 23, 29: 29, 31: 31, 37: 37,
+			41: 41, 43: 43, 47: 47, 53: 53,
+			59: 59, 61: 61, 67: 67, 71: 71,
+			73: 73, 79: 79, 83: 83, 89: 89,
+			97: 97,101: 101,
+		}
+		//Valida tamanno mayor a 0
 		len := input3.ReadAndClear()
-
-		intLen, err := strconv.Atoi(len)
-		intSeed, err := strconv.Atoi(seed)
-		intPeriod, err := strconv.Atoi(period)
-
+		intLen, _ = strconv.Atoi(len)
+		if intLen < 0 {
+			return nil
+		}
+		
+		//Valida periodo mayor 2048
+		period := input2.ReadAndClear()
+		intPeriod, _ = strconv.Atoi(period)
+		if intPeriod < 2048 {
+			return nil
+		}
+		
+		//Valida semilla que sea primo
+		seed := input.ReadAndClear()
+		intSeed, _ = strconv.Atoi(seed)
+		if primos[intSeed] != intSeed{
+			return nil
+		}
+		
+		visualizer.Start(intLen, intSeed, intPeriod)
+		//cancel()
 		return nil
 	},
 		button.GlobalKey(keyboard.KeyEnter),

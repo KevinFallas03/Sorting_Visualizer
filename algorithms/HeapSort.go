@@ -6,13 +6,18 @@ import (
 )
 
 //HeapSort ...
-func HeapSort(data []int, c chan []int) {
+func HeapSort(data []int, c chan []int,stopCh chan struct{}) {
 	t := time.Now()
 	heapify(data)
 	for i := len(data) - 1; i > 0; i-- {
 		data[0], data[i] = data[i], data[0]
 		siftDown(data, 0, i)
-		c <- data
+		select {
+			case <-stopCh:
+				close(c)
+				return
+			case c <- data:
+		}
 	}
 	fmt.Println("HeapSort: ", time.Since(t))
 	close(c)
