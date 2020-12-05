@@ -51,6 +51,7 @@ func QuickSortAux(data []int, c chan []int, stopCh chan struct{}, msgCh chan str
 			case c <- slice6:
 			}
 		}
+		c <- slice6
 		return slice6
 	} else {
 		return slice6

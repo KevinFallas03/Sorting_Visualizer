@@ -48,7 +48,7 @@ func MergeSortAux(data []int, c chan []int, stopCh chan struct{}, msgCh chan str
 		case c <- result:
 		}
 	}
-
+	c <- result
 	return result
 }
 
