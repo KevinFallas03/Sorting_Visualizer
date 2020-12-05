@@ -4,24 +4,25 @@ import (
 	//"fmt"
 	"time"
 )
+
 var closed bool
 
-// QUICKSORT CON PIVOTE ALEATORIO
-func QuickSort(data []int, c chan []int,stopCh chan struct{}, msgCh chan string) {
+// QuickSort con pivote aleatorio
+func QuickSort(data []int, c chan []int, stopCh chan struct{}, msgCh chan string) {
 	t := time.Now()
 	closed = false
-	m := QuickSortAux(data, c, stopCh,msgCh)
-	if !closed{
+	m := QuickSortAux(data, c, stopCh, msgCh)
+	if !closed {
 		c <- m
 		close(c)
-		msgCh <- "QuickSort: "+time.Since(t).String()
+		msgCh <- "QuickSort: " + time.Since(t).String()
 	}
 
 	//fmt.Println("QuickSort: ", time.Since(t))
 }
 
 // QuickSortAux ...
-func QuickSortAux(data []int, c chan []int, stopCh chan struct{},msgCh chan string) []int {
+func QuickSortAux(data []int, c chan []int, stopCh chan struct{}, msgCh chan string) []int {
 
 	var less []int
 	var equals []int
@@ -40,14 +41,14 @@ func QuickSortAux(data []int, c chan []int, stopCh chan struct{},msgCh chan stri
 			}
 		}
 		slice5 := append(QuickSortAux(less, c, stopCh, msgCh), equals...)
-		slice6 = append(slice5, QuickSortAux(greater, c, stopCh,msgCh)...)
-		if !closed{
+		slice6 = append(slice5, QuickSortAux(greater, c, stopCh, msgCh)...)
+		if !closed {
 			select {
-				case <-stopCh:
-					close(c)
-					closed = true
-					return data
-				case c <- slice6:
+			case <-stopCh:
+				close(c)
+				closed = true
+				return data
+			case c <- slice6:
 			}
 		}
 		return slice6

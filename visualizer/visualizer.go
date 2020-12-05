@@ -2,6 +2,7 @@ package visualizer
 
 import (
 	"runtime"
+
 	"../algorithms"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -49,20 +50,21 @@ func generateList(n int, x int, m int) []int {
 	return nums
 }
 
-func Start(n int, x int, m int,msgCh chan string) {
+//Start ...
+func Start(n int, x int, m int, msgCh chan string) {
 	//GENERA LA LISTA DE NUMEROS
 	numberList := generateList(n, x, m)
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
 
 	//GENERA DATA PARA LOS ALGORITMOS
-	var numberLists [][]int      //Lista de listas de numeros
-	var tempLists [][]int        //Lista de listas temporales
-	var actualLists [][]int      //Lista de listas actualizadas
-	var channelList []chan []int //Lista de canales
-	stopCh := make(chan struct{})//Canal para detener todo 
+	var numberLists [][]int       //Lista de listas de numeros
+	var tempLists [][]int         //Lista de listas temporales
+	var actualLists [][]int       //Lista de listas actualizadas
+	var channelList []chan []int  //Lista de canales
+	stopCh := make(chan struct{}) //Canal para detener todo
 
 	//INICIALIZA TODOS LOS DATOS
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 6; i++ {
 		newList := make([]int, len(numberList), len(numberList))
 		copy(newList, numberList)
 		numberLists = append(numberLists, newList)
@@ -72,11 +74,12 @@ func Start(n int, x int, m int,msgCh chan string) {
 	}
 
 	//INICIA CADA ALGORITMO
-	go algorithms.HeapSort(numberLists[0], channelList[0],stopCh,msgCh)
-	go algorithms.InsertionSort(numberLists[1], channelList[1],stopCh,msgCh)
-	go algorithms.SelectionSort(numberLists[2], channelList[2],stopCh,msgCh)
-	go algorithms.BubbleSort(numberLists[3], channelList[3],stopCh,msgCh)
-	go algorithms.QuickSort(numberLists[4], channelList[4],stopCh,msgCh)
+	go algorithms.HeapSort(numberLists[0], channelList[0], stopCh, msgCh)
+	go algorithms.InsertionSort(numberLists[1], channelList[1], stopCh, msgCh)
+	go algorithms.SelectionSort(numberLists[2], channelList[2], stopCh, msgCh)
+	go algorithms.BubbleSort(numberLists[3], channelList[3], stopCh, msgCh)
+	go algorithms.QuickSort(numberLists[4], channelList[4], stopCh, msgCh)
+	go algorithms.MergeSort(numberLists[5], channelList[5], stopCh, msgCh)
 
 	//MOSTRAR VENTANA
 	runtime.LockOSThread()
@@ -87,7 +90,7 @@ func Start(n int, x int, m int,msgCh chan string) {
 	color := false
 	timer := 0
 	percentage := float32(columns) * 0.01
-	if percentage < 1{
+	if percentage < 1 {
 		percentage = 1
 	}
 	for !window.ShouldClose() {
@@ -110,8 +113,8 @@ func Start(n int, x int, m int,msgCh chan string) {
 		}
 		timer++
 	}
-	close(stopCh) 	//Cerrando este canal cerramos los demas canales en cada algoritmo
-	close(msgCh)	//Cerramos el canal de mensajes
+	close(stopCh) //Cerrando este canal cerramos los demas canales en cada algoritmo
+	close(msgCh)  //Cerramos el canal de mensajes
 	// for data := 0; data < len(channelList); data++ {
 	// 	close(channelList[data])
 	// }

@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"strconv"
+
 	//"math/rand"
-	"time"
 	"fmt"
+	"time"
 
 	"github.com/mum4k/termdash"
 	"github.com/mum4k/termdash/align"
@@ -18,20 +19,22 @@ import (
 	"github.com/mum4k/termdash/widgets/button"
 	"github.com/mum4k/termdash/widgets/segmentdisplay"
 	"github.com/mum4k/termdash/widgets/textinput"
+
 	//"github.com/mum4k/termdash/terminal/terminalapi"
-	"github.com/mum4k/termdash/widgets/text"
 	"./visualizer"
+	"github.com/mum4k/termdash/widgets/text"
 )
+
 func writeLines(ctx context.Context, t *text.Text, msgCh chan string) {
 	for {
 		select {
 		case msg := <-msgCh:
-			if msg == ""{
+			if msg == "" {
 				if err := t.Write(fmt.Sprintf("%s\n", "\n")); err != nil {
 					panic(err)
 				}
 				return
-			}else{
+			} else {
 				if err := t.Write(fmt.Sprintf("%s\n", msg)); err != nil {
 					panic(err)
 				}
@@ -106,7 +109,7 @@ func rollText(ctx context.Context, sd *segmentdisplay.SegmentDisplay) {
 }
 
 func main() {
-	
+
 	t, err := tcell.New()
 	if err != nil {
 		panic(err)
@@ -120,14 +123,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	go rollText(ctx, rollingSD) //Gorrutina para movel el titulo 
+	go rollText(ctx, rollingSD) //Gorrutina para movel el titulo
 
 	//TEXT BOX
 	wrapped, err := text.New(text.WrapAtRunes())
 	if err != nil {
 		panic(err)
 	}
-	if err := wrapped.Write("1. BubbleSort.\n2. HeapSort.\n3. SelectionSort.\n4. InsertionSort\n5. QuickSort.\n\nTiempos:\n"); err != nil {
+	if err := wrapped.Write("1. BubbleSort.\n2. HeapSort.\n3. SelectionSort.\n4. InsertionSort\n5. QuickSort.\n6. MergeSort.\n\nTiempos:\n"); err != nil {
 		panic(err)
 	}
 
@@ -147,9 +150,9 @@ func main() {
 
 	//BUTTONS
 	EmpezarB, err := button.New("Empezar", func() error {
-		var intLen,intPeriod,intSeed int
+		var intLen, intPeriod, intSeed int
 		primos := map[int]int{
-			11: 11, 13: 13, 17: 17, 19: 19, 23: 23, 
+			11: 11, 13: 13, 17: 17, 19: 19, 23: 23,
 			29: 29, 31: 31, 37: 37, 41: 41, 43: 43,
 			47: 47, 53: 53, 59: 59, 61: 61, 67: 67,
 			71: 71, 73: 73, 79: 79, 83: 83, 89: 89,
@@ -161,23 +164,23 @@ func main() {
 		if intLen < 0 {
 			return nil
 		}
-		
+
 		//Valida periodo mayor 2048
 		period := input2.ReadAndClear()
 		intPeriod, _ = strconv.Atoi(period)
 		if intPeriod < 2048 {
 			return nil
 		}
-		
+
 		//Valida semilla que sea primo
 		seed := input.ReadAndClear()
 		intSeed, _ = strconv.Atoi(seed)
-		if primos[intSeed] != intSeed{
+		if primos[intSeed] != intSeed {
 			return nil
 		}
 
-		messageCh := make(chan string) //Canal para recibir los tiempos 
-		go writeLines(ctx, wrapped, messageCh)	//Gorrutina para mostrar los tiempos
+		messageCh := make(chan string)         //Canal para recibir los tiempos
+		go writeLines(ctx, wrapped, messageCh) //Gorrutina para mostrar los tiempos
 		visualizer.Start(intLen, intSeed, intPeriod, messageCh)
 		//cancel()
 		return nil
@@ -188,7 +191,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	quitB, err := button.New("Quitar", func() error {
 		cancel()
 		return nil
@@ -201,7 +204,7 @@ func main() {
 	}
 
 	builder := grid.New()
-	//Espacio para el titulo 
+	//Espacio para el titulo
 	builder.Add(
 		grid.RowHeightPerc(40,
 			grid.Widget(
@@ -281,6 +284,7 @@ func main() {
 		panic(err)
 	}
 }
+
 //Funciona que crea botones con el texto que le entra como parametro
 func createInput(message string) (*textinput.TextInput, error) {
 	input, err := textinput.New(
