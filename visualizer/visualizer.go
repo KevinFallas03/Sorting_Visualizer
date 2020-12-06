@@ -16,8 +16,8 @@ const (
 )
 
 var (
-	columns = 0
-	square  = []float32{
+	columns   = 0
+	rectangle = []float32{
 		-0.1, 0.1, 0,
 		-0.1, -0.1, 0,
 		0.1, -0.1, 0,
@@ -33,8 +33,9 @@ type bar struct {
 	color    bool
 }
 
+//generateList crea una lista de numeros aleatorios con el metodo de
+//congruncia lineal multiplicativa
 func generateList(n int, x int, m int) []int {
-
 	//  x es la semilla. Debe de ser primo entre [11, 101]  0 <= x < m
 	//  n es la cantidad.
 	//  1103515245, 12345,
@@ -73,7 +74,7 @@ func Start(n int, x int, m int, msgCh chan string) {
 		actualLists = append(actualLists, numberList)
 	}
 
-	//INICIA CADA ALGORITMO
+	//INICIA CADA ALGORITMO CON CORRUTINAS
 	go algorithms.HeapSort(numberLists[0], channelList[0], stopCh, msgCh)
 	go algorithms.InsertionSort(numberLists[1], channelList[1], stopCh, msgCh)
 	go algorithms.SelectionSort(numberLists[2], channelList[2], stopCh, msgCh)
@@ -150,8 +151,8 @@ func setBars(y float32, data []int, color bool) {
 // 		value = numero que representa la barra
 // 		color = bandera para saber si ya termino para pintarlo de otro color
 func newBar(x int, y float32, value int, color bool) {
-	points := make([]float32, len(square), len(square))
-	copy(points, square)
+	points := make([]float32, len(rectangle), len(rectangle))
+	copy(points, rectangle)
 
 	for i := 0; i < len(points); i++ {
 		var position, size, m float32
@@ -186,7 +187,7 @@ func newBar(x int, y float32, value int, color bool) {
 func (c *bar) draw() {
 	gl.ColorMask(true, c.color, false, false)
 	gl.BindVertexArray(c.drawable)
-	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(rectangle)/3))
 }
 
 // initGlfw inicializa glfw y retorna Window para usarla
