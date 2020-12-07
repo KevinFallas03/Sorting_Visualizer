@@ -1,8 +1,6 @@
 package algorithms
 
 import (
-	//"fmt"
-	//"math/rand"
 	"time"
 )
 
