@@ -130,7 +130,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	if err := wrapped.Write("1. BubbleSort.\n2. HeapSort.\n3. SelectionSort.\n4. InsertionSort\n5. QuickSort.\n6. MergeSort.\n\nTiempos:\n"); err != nil {
+	if err := wrapped.Write("1. MergeSort.\n2. QuickSort.\n3. BubbleSort.\n4. SelectionSort.\n5. InsertionSort .\n6. HeapSort.\n\nTiempos:\n"); err != nil {
 		panic(err)
 	}
 
