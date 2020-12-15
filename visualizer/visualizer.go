@@ -76,11 +76,11 @@ func Start(n int, x int, m int, msgCh chan string) {
 
 	//INICIA CADA ALGORITMO CON CORRUTINAS
 	go algorithms.HeapSort(numberLists[0], channelList[0], stopCh, msgCh)
-	go algorithms.InsertionSort(numberLists[1], channelList[1], stopCh, msgCh)
-	go algorithms.SelectionSort(numberLists[2], channelList[2], stopCh, msgCh)
-	go algorithms.BubbleSort(numberLists[3], channelList[3], stopCh, msgCh)
-	go algorithms.QuickSort(numberLists[4], channelList[4], stopCh, msgCh)
-	go algorithms.MergeSort(numberLists[5], channelList[5], stopCh, msgCh)
+	go algorithms.QuickSort(numberLists[1], channelList[1], stopCh, msgCh)
+	go algorithms.MergeSort(numberLists[2], channelList[2], stopCh, msgCh)
+	go algorithms.InsertionSort(numberLists[3], channelList[3], stopCh, msgCh)
+	go algorithms.SelectionSort(numberLists[4], channelList[4], stopCh, msgCh)
+	go algorithms.BubbleSort(numberLists[5], channelList[5], stopCh, msgCh)
 
 	//MOSTRAR VENTANA
 	runtime.LockOSThread()
@@ -107,7 +107,11 @@ func Start(n int, x int, m int, msgCh chan string) {
 		if timer%int(percentage) == 0 {
 			for data := 0; data < len(channelList); data++ {
 				tempLists[data], color = checkStatus(actualLists[data], tempLists[data])
-				setBars(3.4*float32(data), tempLists[data], color)
+				if data < 3 {
+					setBars(3.4*float32(data), tempLists[data], color, false)
+				} else {
+					setBars(3.4*float32(data), tempLists[data], color, true)
+				}
 			}
 			glfw.PollEvents()
 			window.SwapBuffers()
@@ -138,9 +142,10 @@ func checkStatus(channelData []int, tempData []int) ([]int, bool) {
 //		y = posicion en el eje y
 //  	data = lista de enteros
 //		color = bandera para saber si ya termino para pintarlo de otro color
-func setBars(y float32, data []int, color bool) {
+func setBars(y float32, data []int, color bool, lado bool) {
+
 	for x := range data {
-		newBar(x, y, data[x], color)
+		newBar(x, y, data[x], color, lado)
 	}
 }
 
@@ -150,7 +155,7 @@ func setBars(y float32, data []int, color bool) {
 // 		y = posicion en el eje y
 // 		value = numero que representa la barra
 // 		color = bandera para saber si ya termino para pintarlo de otro color
-func newBar(x int, y float32, value int, color bool) {
+func newBar(x int, y float32, value int, color bool, izqDer bool) {
 	points := make([]float32, len(rectangle), len(rectangle))
 	copy(points, rectangle)
 
@@ -159,8 +164,14 @@ func newBar(x int, y float32, value int, color bool) {
 		switch i % 3 {
 		case 0:
 			size = (2.0 / float32(columns)) / 2
-			position = float32(x) * size
-			m = 0
+			position = float32(x) * size / 2 // POSITION
+			if izqDer == false {
+				m = 0
+			} else {
+				m = 1
+
+			}
+
 		case 1:
 			size = (float32(value) / float32(rows)) / 2
 			position = 0
