@@ -1,12 +1,14 @@
 package visualizer
 
 import (
+	"log"
 	"runtime"
 
 	"../algorithms"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/gl/all-core/gl"
+	"github.com/go-gl/glfw/v3.1/glfw"
+	"github.com/nullboundary/glfont"
 )
 
 const (
@@ -82,11 +84,22 @@ func Start(n int, x int, m int, msgCh chan string) {
 	go algorithms.SelectionSort(numberLists[4], channelList[4], stopCh, msgCh)
 	go algorithms.BubbleSort(numberLists[5], channelList[5], stopCh, msgCh)
 
-	//MOSTRAR VENTANA
 	runtime.LockOSThread()
-	window := initGlfw()
+	if err := glfw.Init(); err != nil {
+		log.Fatalln("failed to initialize glfw:", err)
+	}
 	defer glfw.Terminate()
-	program := initOpenGL()
+	glfw.WindowHint(glfw.Resizable, glfw.False)
+	glfw.WindowHint(glfw.ContextVersionMajor, 4)
+	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+
+	window := initGlfw()
+	initOpenGL()
+
+	font, err := glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
+	if err != nil {
+		log.Panicf("LoadFont: %v", err)
+	}
 
 	color := false
 	timer := 0
@@ -94,9 +107,10 @@ func Start(n int, x int, m int, msgCh chan string) {
 	if percentage < 1 {
 		percentage = 1
 	}
+	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
+	//load font (fontfile, font scale, window width, window height
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		gl.UseProgram(program)
 
 		//OBTIENE INFORMACION DE LOS CANALES
 		for data := 0; data < len(channelList); data++ {
@@ -108,27 +122,32 @@ func Start(n int, x int, m int, msgCh chan string) {
 			for data := 0; data < len(channelList); data++ {
 				tempLists[data], color = checkStatus(actualLists[data], tempLists[data])
 				if data < 3 {
+					font.Printf(100, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
 					setBars(3.4*float32(data), tempLists[data], color, false)
 				} else {
+					font.Printf(800, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
 					setBars(3.4*float32(data), tempLists[data], color, true)
 				}
 			}
-			glfw.PollEvents()
 			window.SwapBuffers()
+			glfw.PollEvents()
+
 		}
 		timer++
 	}
 	close(stopCh) //Cerrando este canal cerramos los demas canales en cada algoritmo
-	close(msgCh)  //Cerramos el canal de mensajes
-	// for data := 0; data < len(channelList); data++ {
-	// 	close(channelList[data])
-	// }
+	close(msgCh)
 }
-
-// Evalua si lo que retorna el canal es vacio
-// Parametros:
-// 		channelData = data que viene del canal
-// 		tempData = data que se guardo anteriormente
+func initGlfw() *glfw.Window {
+	window, _ := glfw.CreateWindow(int(width), int(height), "glfontExample", nil, nil)
+	window.MakeContextCurrent()
+	return window
+}
+func initOpenGL() {
+	if err := gl.Init(); err != nil {
+		panic(err)
+	}
+}
 func checkStatus(channelData []int, tempData []int) ([]int, bool) {
 	if len(channelData) == 0 {
 		return tempData, true
@@ -136,25 +155,12 @@ func checkStatus(channelData []int, tempData []int) ([]int, bool) {
 		return channelData, false
 	}
 }
-
-// Recorre la lista de numeros y por cada numero crea una nueva barra
-// Parametros:
-//		y = posicion en el eje y
-//  	data = lista de enteros
-//		color = bandera para saber si ya termino para pintarlo de otro color
 func setBars(y float32, data []int, color bool, lado bool) {
 
 	for x := range data {
 		newBar(x, y, data[x], color, lado)
 	}
 }
-
-// Crea una barra con el valor entrante
-// Parametros:
-// 		x = posicion en el eje x
-// 		y = posicion en el eje y
-// 		value = numero que representa la barra
-// 		color = bandera para saber si ya termino para pintarlo de otro color
 func newBar(x int, y float32, value int, color bool, izqDer bool) {
 	points := make([]float32, len(rectangle), len(rectangle))
 	copy(points, rectangle)
@@ -193,46 +199,11 @@ func newBar(x int, y float32, value int, color bool, izqDer bool) {
 	}
 	bar.draw()
 }
-
-// Funcion de la estructura bar para poder dibujar
 func (c *bar) draw() {
 	gl.ColorMask(true, c.color, false, false)
 	gl.BindVertexArray(c.drawable)
 	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(rectangle)/3))
 }
-
-// initGlfw inicializa glfw y retorna Window para usarla
-func initGlfw() *glfw.Window {
-	if err := glfw.Init(); err != nil {
-		panic(err)
-	}
-	glfw.WindowHint(glfw.Resizable, glfw.False)
-	glfw.WindowHint(glfw.ContextVersionMajor, 4)
-	glfw.WindowHint(glfw.ContextVersionMinor, 1)
-	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-
-	window, err := glfw.CreateWindow(width, height, "Sorting Algorithms", nil, nil)
-	if err != nil {
-		panic(err)
-	}
-	window.MakeContextCurrent()
-	return window
-}
-
-// initOpenGL inicializa OpenGL y retorna un programa inicializado
-func initOpenGL() uint32 {
-	if err := gl.Init(); err != nil {
-		panic(err)
-	}
-	prog := gl.CreateProgram()
-	gl.LinkProgram(prog)
-	return prog
-}
-
-// makeVao inicializa y retorna un vertex array con los puntos de parametro
-// Parametros:
-// 		points = lista de numeros flotantes
 func makeVao(points []float32) uint32 {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
