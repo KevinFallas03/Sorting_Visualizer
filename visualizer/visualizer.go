@@ -108,7 +108,6 @@ func Start(n int, x int, m int, msgCh chan string) {
 		percentage = 1
 	}
 	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
-	//load font (fontfile, font scale, window width, window height
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -139,7 +138,7 @@ func Start(n int, x int, m int, msgCh chan string) {
 	close(msgCh)
 }
 func initGlfw() *glfw.Window {
-	window, _ := glfw.CreateWindow(int(width), int(height), "glfontExample", nil, nil)
+	window, _ := glfw.CreateWindow(int(width), int(height), "THE BEST SORT VISUALIZER", nil, nil)
 	window.MakeContextCurrent()
 	return window
 }

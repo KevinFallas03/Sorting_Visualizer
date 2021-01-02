@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"log"
+	"os"
 	"strconv"
 
 	//"math/rand"
@@ -26,6 +28,18 @@ import (
 )
 
 func writeLines(ctx context.Context, t *text.Text, msgCh chan string) {
+
+	//Abre el archivo, si no existe lo crea
+	f, err := os.OpenFile("data.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	f.WriteString("====CORRIDA====\n")
+
+	//defer: lifo
+	defer f.Close()
+	defer f.WriteString("==============\n\n")
+
 	for {
 		select {
 		case msg := <-msgCh:
@@ -35,6 +49,9 @@ func writeLines(ctx context.Context, t *text.Text, msgCh chan string) {
 				}
 				return
 			} else {
+				if _, err := f.WriteString(msg + "\n"); err != nil {
+					log.Println(err)
+				}
 				if err := t.Write(fmt.Sprintf("%s\n", msg)); err != nil {
 					panic(err)
 				}
@@ -128,9 +145,6 @@ func main() {
 	//TEXT BOX
 	wrapped, err := text.New(text.WrapAtRunes())
 	if err != nil {
-		panic(err)
-	}
-	if err := wrapped.Write("1. MergeSort.\n2. QuickSort.\n3. BubbleSort.\n4. SelectionSort.\n5. InsertionSort .\n6. HeapSort.\n\nTiempos:\n"); err != nil {
 		panic(err)
 	}
 
