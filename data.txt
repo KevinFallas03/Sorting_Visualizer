@@ -1,0 +1,102 @@
+=======================CORRIDA========
+
+InsertionSort:
+  Tiempo inicio = 21:49:3
+  Tiempo final = 21:49:10
+  Tiempo total = 6.7805169s
+  Intercambio de valores = 2460
+  Comparación entre valores = 99
+  Condición de un ciclo = 99
+
+HeapSort:
+  Tiempo inicio = 21:49:3
+  Tiempo final = 21:49:10
+  Tiempo total = 7.1622421s
+  Intercambio de valores = 565
+  Comparación entre valores = 1637
+  Condición de un ciclo = 99
+
+SelectionSort:
+  Tiempo inicio = 21:49:3
+  Tiempo final = 21:49:10
+  Tiempo total = 7.2031297s
+  Intercambio de valores = 100
+  Comparación entre valores = 4950
+  Condición de un ciclo = 5050
+
+BubbleSort:
+  Tiempo inicio = 21:49:3
+  Tiempo final = 21:49:10
+  Tiempo total = 7.2041271s
+  Intercambio de valores = 2368
+  Comparación entre valores = 4950
+  Condición de un ciclo = 100
+
+QuickSort
+  Tiempo inicio = 21:49:3
+  Tiempo final = 21:49:12
+  Tiempo total = 9.5133416s
+  Intercambio de valores = 297
+  Comparación entre valores = 764
+  Condición de un ciclo = 149
+
+MergeSort:
+  Tiempo inicio = 21:49:3
+  Tiempo final = 21:49:15
+  Tiempo total = 12.0649675s
+  Intercambio de valores = 672
+  Comparación entre valores = 672
+  Condición de un ciclo = 199
+=====================================
+
+=======================CORRIDA========
+
+InsertionSort:
+  Tiempo inicio = 22:5:10
+  Tiempo final = 22:5:16
+  Tiempo total = 6.1380113s
+  Intercambio de valores = 2460
+  Comparación entre valores = 99
+  Condición de un ciclo = 99
+
+HeapSort:
+  Tiempo inicio = 22:5:10
+  Tiempo final = 22:5:16
+  Tiempo total = 6.4704157s
+  Intercambio de valores = 565
+  Comparación entre valores = 1637
+  Condición de un ciclo = 99
+
+SelectionSort:
+  Tiempo inicio = 22:5:10
+  Tiempo final = 22:5:16
+  Tiempo total = 6.5304808s
+  Intercambio de valores = 100
+  Comparación entre valores = 4950
+  Condición de un ciclo = 5050
+
+BubbleSort:
+  Tiempo inicio = 22:5:10
+  Tiempo final = 22:5:16
+  Tiempo total = 6.5304808s
+  Intercambio de valores = 2368
+  Comparación entre valores = 4950
+  Condición de un ciclo = 100
+
+QuickSort
+  Tiempo inicio = 22:5:10
+  Tiempo final = 22:5:19
+  Tiempo total = 8.9061623s
+  Intercambio de valores = 297
+  Comparación entre valores = 764
+  Condición de un ciclo = 149
+
+MergeSort:
+  Tiempo inicio = 22:5:10
+  Tiempo final = 22:5:21
+  Tiempo total = 11.5609616s
+  Intercambio de valores = 672
+  Comparación entre valores = 672
+  Condición de un ciclo = 199
+=====================================
+

@@ -34,11 +34,11 @@ func writeLines(ctx context.Context, t *text.Text, msgCh chan string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	f.WriteString("====CORRIDA====\n")
+	f.WriteString("=======================CORRIDA========\n")
 
 	//defer: lifo
 	defer f.Close()
-	defer f.WriteString("==============\n\n")
+	defer f.WriteString("=====================================\n\n")
 
 	for {
 		select {

@@ -19,11 +19,11 @@ func InsertionSort(data []int, c chan []int, stopCh chan struct{}, msgCh chan st
 			j := i - 1
 			temp := data[i]
 			for j >= 0 && data[j] > temp {
-				loops++
 				swaps++
 				data[j+1] = data[j]
 				j--
 			}
+			swaps++
 			data[j+1] = temp
 			select {
 			case <-stopCh:
@@ -36,6 +36,6 @@ func InsertionSort(data []int, c chan []int, stopCh chan struct{}, msgCh chan st
 
 	hi, mi, si := t.Clock()
 	hf, mf, sf := time.Now().Clock()
-	msgCh <- "InsertionSort:" + "\n  Tiempo inicio = " + strconv.Itoa(hi) + ":" + strconv.Itoa(mi) + ":" + strconv.Itoa(si) + "\n  Tiempo final = " + strconv.Itoa(hf) + ":" + strconv.Itoa(mf) + ":" + strconv.Itoa(sf) + "\n  Tiempo total = " + time.Since(t).String() + "\n  Intercambio de valores = " + strconv.Itoa(swaps) + "\n  Comparación entre valores = " + strconv.Itoa(comparations) + "\n  Condición de un ciclo = " + strconv.Itoa(loops)
+	msgCh <- "\nInsertionSort:" + "\n  Tiempo inicio = " + strconv.Itoa(hi) + ":" + strconv.Itoa(mi) + ":" + strconv.Itoa(si) + "\n  Tiempo final = " + strconv.Itoa(hf) + ":" + strconv.Itoa(mf) + ":" + strconv.Itoa(sf) + "\n  Tiempo total = " + time.Since(t).String() + "\n  Intercambio de valores = " + strconv.Itoa(swaps) + "\n  Comparación entre valores = " + strconv.Itoa(comparations) + "\n  Condición de un ciclo = " + strconv.Itoa(loops)
 	close(c)
 }
