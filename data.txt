@@ -100,3 +100,223 @@ MergeSort:
   Condición de un ciclo = 199
 =====================================
 
+=======================CORRIDA========
+=======================CORRIDA========
+=======================CORRIDA========
+=======================CORRIDA========
+=======================CORRIDA========
+=======================CORRIDA========
+
+InsertionSort:
+  Tiempo inicio = 21:5:59
+  Tiempo final = 21:6:9
+  Tiempo total = 10.3250213s
+  Intercambio de valores = 2460
+  Comparación entre valores = 99
+  Condición de un ciclo = 99
+
+HeapSort:
+  Tiempo inicio = 21:5:59
+  Tiempo final = 21:6:10
+  Tiempo total = 10.699023s
+  Intercambio de valores = 565
+  Comparación entre valores = 1637
+  Condición de un ciclo = 99
+
+SelectionSort:
+  Tiempo inicio = 21:5:59
+  Tiempo final = 21:6:10
+  Tiempo total = 10.7478943s
+  Intercambio de valores = 100
+  Comparación entre valores = 4950
+  Condición de un ciclo = 5050
+
+BubbleSort:
+  Tiempo inicio = 21:5:59
+  Tiempo final = 21:6:10
+  Tiempo total = 10.7478943s
+  Intercambio de valores = 2368
+  Comparación entre valores = 4950
+  Condición de un ciclo = 100
+=======================CORRIDA========
+=====================================
+
+=======================CORRIDA========
+
+InsertionSort:
+  Tiempo inicio = 21:8:40
+  Tiempo final = 21:8:46
+  Tiempo total = 5.580041s
+  Intercambio de valores = 2460
+  Comparación entre valores = 99
+  Condición de un ciclo = 99
+
+HeapSort:
+  Tiempo inicio = 21:8:40
+  Tiempo final = 21:8:46
+  Tiempo total = 5.9256997s
+  Intercambio de valores = 565
+  Comparación entre valores = 1637
+  Condición de un ciclo = 99
+
+SelectionSort:
+  Tiempo inicio = 21:8:40
+  Tiempo final = 21:8:46
+  Tiempo total = 5.9655935s
+  Intercambio de valores = 100
+  Comparación entre valores = 4950
+  Condición de un ciclo = 5050
+
+BubbleSort:
+  Tiempo inicio = 21:8:40
+  Tiempo final = 21:8:46
+  Tiempo total = 5.9655935s
+  Intercambio de valores = 2368
+  Comparación entre valores = 4950
+  Condición de un ciclo = 100
+
+QuickSort
+  Tiempo inicio = 21:8:40
+  Tiempo final = 21:8:48
+  Tiempo total = 8.2750828s
+  Intercambio de valores = 297
+  Comparación entre valores = 764
+  Condición de un ciclo = 149
+=======================CORRIDA========
+
+InsertionSort:
+  Tiempo inicio = 21:9:37
+  Tiempo final = 21:9:42
+  Tiempo total = 5.383336s
+  Intercambio de valores = 2460
+  Comparación entre valores = 99
+  Condición de un ciclo = 99
+
+HeapSort:
+  Tiempo inicio = 21:9:37
+  Tiempo final = 21:9:43
+  Tiempo total = 5.719437s
+  Intercambio de valores = 565
+  Comparación entre valores = 1637
+  Condición de un ciclo = 99
+
+SelectionSort:
+  Tiempo inicio = 21:9:37
+  Tiempo final = 21:9:43
+  Tiempo total = 5.7613266s
+  Intercambio de valores = 100
+  Comparación entre valores = 4950
+  Condición de un ciclo = 5050
+
+BubbleSort:
+  Tiempo inicio = 21:9:37
+  Tiempo final = 21:9:43
+  Tiempo total = 5.7613266s
+  Intercambio de valores = 2368
+  Comparación entre valores = 4950
+  Condición de un ciclo = 100
+
+QuickSort
+  Tiempo inicio = 21:9:37
+  Tiempo final = 21:9:45
+  Tiempo total = 7.9783231s
+  Intercambio de valores = 297
+  Comparación entre valores = 764
+  Condición de un ciclo = 149
+=====================================
+
+=======================CORRIDA========
+
+InsertionSort:
+  Tiempo inicio = 21:10:37
+  Tiempo final = 21:10:43
+  Tiempo total = 5.6932191s
+  Intercambio de valores = 2460
+  Comparación entre valores = 99
+  Condición de un ciclo = 99
+
+HeapSort:
+  Tiempo inicio = 21:10:37
+  Tiempo final = 21:10:43
+  Tiempo total = 6.0355453s
+  Intercambio de valores = 565
+  Comparación entre valores = 1637
+  Condición de un ciclo = 99
+
+BubbleSort:
+  Tiempo inicio = 21:10:37
+  Tiempo final = 21:10:43
+  Tiempo total = 6.0824179s
+  Intercambio de valores = 2368
+  Comparación entre valores = 4950
+  Condición de un ciclo = 100
+
+SelectionSort:
+  Tiempo inicio = 21:10:37
+  Tiempo final = 21:10:43
+  Tiempo total = 6.0824179s
+  Intercambio de valores = 100
+  Comparación entre valores = 4950
+  Condición de un ciclo = 5050
+=====================================
+
+=======================CORRIDA========
+=======================CORRIDA========
+=======================CORRIDA========
+=====================================
+
+=======================CORRIDA========
+=======================CORRIDA========
+=======================CORRIDA========
+=======================CORRIDA========
+=======================CORRIDA========
+
+InsertionSort:
+  Tiempo inicio = 18:27:17
+  Tiempo final = 18:27:24
+  Tiempo total = 7.1824696s
+  Intercambio de valores = 2460
+  Comparación entre valores = 99
+  Condición de un ciclo = 99
+
+HeapSort:
+  Tiempo inicio = 18:27:17
+  Tiempo final = 18:27:24
+  Tiempo total = 7.5644474s
+  Intercambio de valores = 565
+  Comparación entre valores = 1637
+  Condición de un ciclo = 99
+
+SelectionSort:
+  Tiempo inicio = 18:27:17
+  Tiempo final = 18:27:24
+  Tiempo total = 7.6103242s
+  Intercambio de valores = 100
+  Comparación entre valores = 4950
+  Condición de un ciclo = 5050
+
+BubbleSort:
+  Tiempo inicio = 18:27:17
+  Tiempo final = 18:27:24
+  Tiempo total = 7.6103242s
+  Intercambio de valores = 2368
+  Comparación entre valores = 4950
+  Condición de un ciclo = 100
+
+QuickSort
+  Tiempo inicio = 18:27:17
+  Tiempo final = 18:27:27
+  Tiempo total = 10.3522067s
+  Intercambio de valores = 297
+  Comparación entre valores = 764
+  Condición de un ciclo = 149
+
+MergeSort:
+  Tiempo inicio = 18:27:17
+  Tiempo final = 18:27:30
+  Tiempo total = 13.637638s
+  Intercambio de valores = 672
+  Comparación entre valores = 672
+  Condición de un ciclo = 199
+=====================================
+

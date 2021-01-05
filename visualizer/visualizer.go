@@ -4,8 +4,8 @@ import (
 	"log"
 	"runtime"
 
+	//"../algorithms"
 	"../algorithms"
-
 	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/nullboundary/glfont"
@@ -75,6 +75,15 @@ func Start(n int, x int, m int, msgCh chan string) {
 		tempLists = append(tempLists, numberList)
 		actualLists = append(actualLists, numberList)
 	}
+	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
+
+	//INICIA LAS GRAFICADORAS
+	// go drawGraph(channelList[0], algorithmsName[5], 100, 84, false, numberLists[0])
+	// go drawGraph(channelList[1], algorithmsName[4], 100, 204, false, numberLists[1])
+	// go drawGraph(channelList[2], algorithmsName[3], 100, 324, false, numberLists[2])
+	// go drawGraph(channelList[3], algorithmsName[2], 800, 444, true, numberLists[3])
+	// go drawGraph(channelList[4], algorithmsName[1], 800, 564, true, numberLists[4])
+	// go drawGraph(channelList[5], algorithmsName[0], 800, 684, true, numberLists[5])
 
 	//INICIA CADA ALGORITMO CON CORRUTINAS
 	go algorithms.HeapSort(numberLists[0], channelList[0], stopCh, msgCh)
@@ -107,7 +116,7 @@ func Start(n int, x int, m int, msgCh chan string) {
 	if percentage < 1 {
 		percentage = 1
 	}
-	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
+
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -118,25 +127,50 @@ func Start(n int, x int, m int, msgCh chan string) {
 
 		//CADA CIERTO TIEMPO PINTA
 		if timer%int(percentage) == 0 {
+
 			for data := 0; data < len(channelList); data++ {
 				tempLists[data], color = checkStatus(actualLists[data], tempLists[data])
 				if data < 3 {
-					font.Printf(100, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
 					setBars(3.4*float32(data), tempLists[data], color, false)
+					font.Printf(100, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
 				} else {
-					font.Printf(800, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
 					setBars(3.4*float32(data), tempLists[data], color, true)
+					font.Printf(800, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
 				}
 			}
-			window.SwapBuffers()
-			glfw.PollEvents()
 
 		}
 		timer++
+		glfw.PollEvents()
+		window.SwapBuffers()
 	}
 	close(stopCh) //Cerrando este canal cerramos los demas canales en cada algoritmo
 	close(msgCh)
 }
+
+func drawGraph(dataCh chan []int, name string, x, y int, left bool, originalList []int) {
+
+	font, err := glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
+	if err != nil {
+		log.Panicf("LoadFont: %v", err)
+	}
+	font.Printf(float32(x), float32(y), 1.2, name)
+	prevList := originalList
+
+	for {
+		select {
+		case dataList := <-dataCh:
+			if len(dataList) != 0 {
+				setBars(((float32(x)/120)-0.7)*3.4, dataList, false, left)
+				prevList = dataList
+			} else {
+				setBars(((float32(x)/120)-0.7)*3.4, prevList, true, left)
+				return
+			}
+		}
+	}
+}
+
 func initGlfw() *glfw.Window {
 	window, _ := glfw.CreateWindow(int(width), int(height), "THE BEST SORT VISUALIZER", nil, nil)
 	window.MakeContextCurrent()
@@ -155,7 +189,6 @@ func checkStatus(channelData []int, tempData []int) ([]int, bool) {
 	}
 }
 func setBars(y float32, data []int, color bool, lado bool) {
-
 	for x := range data {
 		newBar(x, y, data[x], color, lado)
 	}
@@ -174,9 +207,7 @@ func newBar(x int, y float32, value int, color bool, izqDer bool) {
 				m = 0
 			} else {
 				m = 1
-
 			}
-
 		case 1:
 			size = (float32(value) / float32(rows)) / 2
 			position = 0
@@ -191,7 +222,6 @@ func newBar(x int, y float32, value int, color bool, izqDer bool) {
 			points[i] = (((position + size) * 2) - 1) + m
 		}
 	}
-
 	bar := &bar{
 		drawable: makeVao(points),
 		color:    color,
@@ -208,13 +238,11 @@ func makeVao(points []float32) uint32 {
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
-
 	var vao uint32
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
 	gl.EnableVertexAttribArray(0)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
-
 	return vao
 }
