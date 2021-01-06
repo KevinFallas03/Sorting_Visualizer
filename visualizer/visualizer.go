@@ -101,11 +101,6 @@ func main() {
 	window := initGlfw()
 	initOpenGL()
 
-	font, err := glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
-	if err != nil {
-		log.Panicf("LoadFont: %v", err)
-	}
-
 	color := false
 	timer := 0
 	percentage := float32(columns) * 0.01
@@ -126,11 +121,9 @@ func main() {
 			for data := 0; data < len(channelList); data++ {
 				tempLists[data], color = checkStatus(actualLists[data], tempLists[data])
 				if data < 3 {
-					setBars(3.4*float32(data), tempLists[data], color, false)
-					font.Printf(100, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
+					drawGraph(3.4*float32(data), tempLists[data], color, false, algorithmsName[data], 100)
 				} else {
-					setBars(3.4*float32(data), tempLists[data], color, true)
-					font.Printf(800, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
+					drawGraph(3.4*float32(data), tempLists[data], color, true, algorithmsName[data], 800)
 				}
 			}
 			window.SwapBuffers()
@@ -141,6 +134,15 @@ func main() {
 	}
 	close(stopCh) //Cerrando este canal cerramos los demas canales en cada algoritmo
 	close(msgCh)
+}
+func drawGraph(y float32, data []int, color bool, lado bool, name string, x float32) {
+
+	setBars(y, data, color, lado)
+	font, err := glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
+	if err != nil {
+		log.Panicf("LoadFont: %v", err)
+	}
+	font.Printf(x, ((y/3.4)+0.7)*120, 1.2, name) //x,y,scale,string,printf args
 }
 func initGlfw() *glfw.Window {
 	window, _ := glfw.CreateWindow(int(width), int(height), "THE BEST SORT VISUALIZER", nil, nil)
