@@ -1,4 +1,4 @@
-package visualizer
+package main
 
 import (
 	"log"
@@ -54,7 +54,12 @@ func generateList(n int, x int, m int) []int {
 }
 
 //Start ...
-func Start(n int, x int, m int, msgCh chan string) {
+func main() {
+	n := 200
+	x := 101
+	m := 2048
+	msgCh := make(chan string)
+
 	//GENERA LA LISTA DE NUMEROS
 	numberList := generateList(n, x, m)
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
@@ -121,11 +126,11 @@ func Start(n int, x int, m int, msgCh chan string) {
 			for data := 0; data < len(channelList); data++ {
 				tempLists[data], color = checkStatus(actualLists[data], tempLists[data])
 				if data < 3 {
-					font.Printf(100, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
 					setBars(3.4*float32(data), tempLists[data], color, false)
+					font.Printf(100, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
 				} else {
-					font.Printf(800, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
 					setBars(3.4*float32(data), tempLists[data], color, true)
+					font.Printf(800, (float32(data)+0.7)*120, 1.2, algorithmsName[data]) //x,y,scale,string,printf args
 				}
 			}
 			window.SwapBuffers()
