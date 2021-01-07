@@ -28,11 +28,21 @@ var (
 		0.1, 0.1, 0,
 		0.1, -0.1, 0,
 	}
+	window *glfw.Window
+	font   *glfont.Font
 )
 
 type bar struct {
 	drawable uint32
-	color    bool
+	color    []bool
+}
+
+type graph struct {
+	bars      []bar
+	color     []bool
+	yPosition float32
+	lado      bool
+	name      string
 }
 
 //generateList crea una lista de numeros aleatorios con el metodo de
@@ -65,11 +75,14 @@ func main() {
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
 
 	//GENERA DATA PARA LOS ALGORITMOS
-	var numberLists [][]int       //Lista de listas de numeros
-	var tempLists [][]int         //Lista de listas temporales
-	var actualLists [][]int       //Lista de listas actualizadas
-	var channelList []chan []int  //Lista de canales
+	var numberLists [][]int      //Lista de listas de numeros
+	var tempLists [][]int        //Lista de listas temporales
+	var actualLists [][]int      //Lista de listas actualizadas
+	var channelList []chan []int //Lista de canales
+	//var graphList []*graph        //Lista de graficos
 	stopCh := make(chan struct{}) //Canal para detener todo
+	color := []bool{false, true, false}
+	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
 
 	//INICIALIZA TODOS LOS DATOS
 	for i := 0; i < 6; i++ {
@@ -79,6 +92,12 @@ func main() {
 		channelList = append(channelList, make(chan []int))
 		tempLists = append(tempLists, numberList)
 		actualLists = append(actualLists, numberList)
+		// lado := true
+		// if i > 2 {
+		// 	lado = false
+		// }
+		// newGraph := createGraph(3.4*float32(i), newList, color, lado, algorithmsName[i])
+		// graphList = append(graphList, newGraph)
 	}
 
 	//INICIA CADA ALGORITMO CON CORRUTINAS
@@ -98,76 +117,80 @@ func main() {
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 
-	window := initGlfw()
+	window = initGlfw()
 	initOpenGL()
 
-	color := false
-	timer := 0
-	percentage := float32(columns) * 0.01
-	if percentage < 1 {
-		percentage = 1
-	}
-	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
+	font, _ = glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
+
 	for !window.ShouldClose() {
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		//OBTIENE INFORMACION DE LOS CANALES
-		for data := 0; data < len(channelList); data++ {
-			actualLists[data] = <-channelList[data]
+		//gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		select {
+		case actualLists[0] = <-channelList[0]:
+			tempLists[0], color = checkStatus(actualLists[0], tempLists[0])
+			// graphList[0].updateBarsGraph(tempLists[0])
+			// graphList[0].drawGraph()
+			drawGraph(3.4*float32(0), tempLists[0], color, false, algorithmsName[0], 100)
+		case actualLists[1] = <-channelList[1]:
+			tempLists[1], color = checkStatus(actualLists[1], tempLists[1])
+			// graphList[1].updateBarsGraph(tempLists[1])
+			// graphList[1].drawGraph()
+			drawGraph(3.4*float32(1), tempLists[1], color, false, algorithmsName[1], 100)
+		case actualLists[2] = <-channelList[2]:
+			tempLists[2], color = checkStatus(actualLists[2], tempLists[2])
+			// graphList[2].updateBarsGraph(tempLists[2])
+			// graphList[2].drawGraph()
+			drawGraph(3.4*float32(2), tempLists[2], color, false, algorithmsName[2], 100)
+		case actualLists[3] = <-channelList[3]:
+			tempLists[3], color = checkStatus(actualLists[3], tempLists[3])
+			// graphList[3].updateBarsGraph(tempLists[3])
+			// graphList[3].drawGraph()
+			drawGraph(3.4*float32(3), tempLists[3], color, true, algorithmsName[3], 800)
+		case actualLists[4] = <-channelList[4]:
+			tempLists[4], color = checkStatus(actualLists[4], tempLists[4])
+			// graphList[4].updateBarsGraph(tempLists[4])
+			// graphList[4].drawGraph()
+			drawGraph(3.4*float32(4), tempLists[4], color, true, algorithmsName[4], 800)
+		case actualLists[5] = <-channelList[5]:
+			tempLists[5], color = checkStatus(actualLists[5], tempLists[5])
+			// graphList[5].updateBarsGraph(tempLists[5])
+			// graphList[5].drawGraph()
+			drawGraph(3.4*float32(5), tempLists[5], color, true, algorithmsName[5], 800)
 		}
-
-		//CADA CIERTO TIEMPO PINTA
-		if timer%int(percentage) == 0 {
-			for data := 0; data < len(channelList); data++ {
-				tempLists[data], color = checkStatus(actualLists[data], tempLists[data])
-				if data < 3 {
-					drawGraph(3.4*float32(data), tempLists[data], color, false, algorithmsName[data], 100)
-				} else {
-					drawGraph(3.4*float32(data), tempLists[data], color, true, algorithmsName[data], 800)
-				}
-			}
-			window.SwapBuffers()
-			glfw.PollEvents()
-
-		}
-		timer++
+		// for data := 0; data < len(channelList); data++ {
+		// 	actualLists[data] = <-channelList[data]
+		// 	tempLists[data], color = checkStatus(actualLists[data], tempLists[data])
+		// 	if data < 3 {
+		// 		drawGraph(3.4*float32(data), tempLists[data], color, false, algorithmsName[data], 100)
+		// 	} else {
+		// 		drawGraph(3.4*float32(data), tempLists[data], color, true, algorithmsName[data], 800)
+		// 	}
+		// }
+		glfw.PollEvents()
+		window.SwapBuffers()
 	}
 	close(stopCh) //Cerrando este canal cerramos los demas canales en cada algoritmo
 	close(msgCh)
 }
-func drawGraph(y float32, data []int, color bool, lado bool, name string, x float32) {
 
+func drawGraph(y float32, data []int, color []bool, lado bool, name string, x float32) {
 	setBars(y, data, color, lado)
-	font, err := glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
-	if err != nil {
-		log.Panicf("LoadFont: %v", err)
-	}
 	font.Printf(x, ((y/3.4)+0.7)*120, 1.2, name) //x,y,scale,string,printf args
 }
-func initGlfw() *glfw.Window {
-	window, _ := glfw.CreateWindow(int(width), int(height), "THE BEST SORT VISUALIZER", nil, nil)
-	window.MakeContextCurrent()
-	return window
-}
-func initOpenGL() {
-	if err := gl.Init(); err != nil {
-		panic(err)
-	}
-}
-func checkStatus(channelData []int, tempData []int) ([]int, bool) {
-	if len(channelData) == 0 {
-		return tempData, true
-	} else {
-		return channelData, false
-	}
-}
-func setBars(y float32, data []int, color bool, lado bool) {
 
+func checkStatus(channelData []int, tempData []int) ([]int, []bool) {
+	if len(channelData) == 0 {
+		return tempData, []bool{true, true, true}
+	} else {
+		return channelData, []bool{true, false, false}
+	}
+}
+func setBars(y float32, data []int, color []bool, lado bool) {
 	for x := range data {
 		newBar(x, y, data[x], color, lado)
 	}
 }
-func newBar(x int, y float32, value int, color bool, izqDer bool) {
+func newBar(x int, y float32, value int, color []bool, izqDer bool) bar {
 	points := make([]float32, len(rectangle), len(rectangle))
 	copy(points, rectangle)
 
@@ -181,9 +204,7 @@ func newBar(x int, y float32, value int, color bool, izqDer bool) {
 				m = 0
 			} else {
 				m = 1
-
 			}
-
 		case 1:
 			size = (float32(value) / float32(rows)) / 2
 			position = 0
@@ -199,14 +220,18 @@ func newBar(x int, y float32, value int, color bool, izqDer bool) {
 		}
 	}
 
-	bar := &bar{
+	bar := bar{
 		drawable: makeVao(points),
 		color:    color,
 	}
+
 	bar.draw()
+	return bar
 }
+
+//FUNCIONES DE LA BARRA
 func (c *bar) draw() {
-	gl.ColorMask(true, c.color, false, false)
+	gl.ColorMask(c.color[0], c.color[1], c.color[2], false)
 	gl.BindVertexArray(c.drawable)
 	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(rectangle)/3))
 }
@@ -224,4 +249,17 @@ func makeVao(points []float32) uint32 {
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
 
 	return vao
+}
+func initGlfw() *glfw.Window {
+	window, _ := glfw.CreateWindow(int(width), int(height), "THE BEST SORT VISUALIZER", nil, nil)
+	window.MakeContextCurrent()
+	return window
+}
+func initOpenGL() uint32 {
+	if err := gl.Init(); err != nil {
+		panic(err)
+	}
+	prog := gl.CreateProgram()
+	gl.LinkProgram(prog)
+	return prog
 }
