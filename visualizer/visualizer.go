@@ -115,21 +115,27 @@ func main() {
 	initOpenGL()
 
 	//INICIA LOS GRAFICOS
+	font, _ = glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
 	color := []bool{true, false, true}
 	var graphList []*graph //Lista de graficos
 	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
 	for i := 0; i < 6; i++ {
 		lado := false
+		x := 100
 		if i > 2 {
 			lado = true
+			x = 800
 		}
 		newGraph := createGraph(3.4*float32(i), numberLists[i], color, lado, algorithmsName[i])
 		graphList = append(graphList, newGraph)
+
+		font.Printf(float32(x), (float32(i)+0.7)*120, 1.2, algorithmsName[i])
+		window.SwapBuffers()
+		font.Printf(float32(x), (float32(i)+0.7)*120, 1.2, algorithmsName[i])
 	}
 
-	font, _ = glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
-
 	gl.Enable(gl.SCISSOR_TEST)
+
 	for !window.ShouldClose() {
 		select {
 		case actualLists[0] = <-channelList[0]:
@@ -139,31 +145,31 @@ func main() {
 			graphList[0].updateGraph(tempLists[0])
 			graphList[0].drawGraph()
 		case actualLists[1] = <-channelList[1]:
-			gl.Scissor(0, 117, 1280, 117)
+			gl.Scissor(0, 117, 640, 117)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 			tempLists[1], graphList[0].color = checkStatus(actualLists[1], tempLists[1])
 			graphList[1].updateGraph(tempLists[1])
 			graphList[1].drawGraph()
 		case actualLists[2] = <-channelList[2]:
-			gl.Scissor(0, 234, 1280, 117)
+			gl.Scissor(0, 234, 640, 117)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 			tempLists[2], graphList[0].color = checkStatus(actualLists[2], tempLists[2])
 			graphList[2].updateGraph(tempLists[2])
 			graphList[2].drawGraph()
 		case actualLists[3] = <-channelList[3]:
-			gl.Scissor(0, 351, 1280, 117)
+			gl.Scissor(640, 351, 640, 117)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 			tempLists[3], graphList[0].color = checkStatus(actualLists[3], tempLists[3])
 			graphList[3].updateGraph(tempLists[3])
 			graphList[3].drawGraph()
 		case actualLists[4] = <-channelList[4]:
-			gl.Scissor(0, 468, 1280, 117)
+			gl.Scissor(640, 468, 640, 117)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 			tempLists[4], graphList[0].color = checkStatus(actualLists[4], tempLists[4])
 			graphList[4].updateGraph(tempLists[4])
 			graphList[4].drawGraph()
 		case actualLists[5] = <-channelList[5]:
-			gl.Scissor(0, 585, 1280, 117)
+			gl.Scissor(640, 585, 640, 117)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 			tempLists[5], graphList[0].color = checkStatus(actualLists[5], tempLists[5])
 			graphList[5].updateGraph(tempLists[5])
@@ -176,11 +182,6 @@ func main() {
 		// 	tempLists[data], graphList[0].color = checkStatus(actualLists[data], tempLists[data])
 		// 	graphList[data].updateGraph(tempLists[data])
 		// 	graphList[data].drawGraph()
-		// 	// if data < 3 {
-		// 	// 	drawGraph(3.4*float32(data), tempLists[data], color, false, algorithmsName[data], 100)
-		// 	// } else {
-		// 	// 	drawGraph(3.4*float32(data), tempLists[data], color, true, algorithmsName[data], 800)
-		// 	// }
 		// }
 		glfw.PollEvents()
 		window.SwapBuffers()
@@ -216,13 +217,6 @@ func createGraph(yPos float32, data []int, color []bool, lado bool, algorithmNam
 	return newGraph
 }
 func (g *graph) drawGraph() {
-
-	x := 800
-	if g.lado {
-		x = 100
-	}
-	font.Printf(float32(x), ((g.yPosition)+0.7)*120, 1.2, g.name) //x,y,scale,string,printf args
-
 	for i := 0; i < len(g.bars); i++ {
 		g.bars[i].drawBar()
 	}
