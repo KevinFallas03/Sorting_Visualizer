@@ -33,14 +33,15 @@ var (
 )
 
 type bar struct {
-	drawable  uint32
-	color     []bool
-	colorTest []float32
+	drawable uint32
+	color    []bool
+	value    int
+	index    float32
 }
 
 type graph struct {
-	bars      []bar
-	color     []float32
+	bars      []*bar
+	color     []bool
 	yPosition float32
 	lado      bool
 	name      string
@@ -71,20 +72,16 @@ func main() {
 	m := 2048
 	msgCh := make(chan string)
 
-	//GENERA LA LISTA DE NUMEROS
+	//GENERA LA LISTA DE NUMEROS ALEATORIOS
 	numberList := generateList(n, x, m)
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
 
 	//GENERA DATA PARA LOS ALGORITMOS
-	var numberLists [][]int      //Lista de listas de numeros
-	var tempLists [][]int        //Lista de listas temporales
-	var actualLists [][]int      //Lista de listas actualizadas
-	var channelList []chan []int //Lista de canales
-	//var graphList []*graph        //Lista de graficos
+	var numberLists [][]int       //Lista de listas de numeros
+	var tempLists [][]int         //Lista de listas temporales
+	var actualLists [][]int       //Lista de listas actualizadas
+	var channelList []chan []int  //Lista de canales
 	stopCh := make(chan struct{}) //Canal para detener todo
-	//color := []bool{true, false, false}
-	algorithmsColors := [3][]bool{[]bool{true, false, false}, []bool{false, true, false}, []bool{false, false, true}}
-	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
 
 	//INICIALIZA TODOS LOS DATOS
 	for i := 0; i < 6; i++ {
@@ -94,12 +91,6 @@ func main() {
 		channelList = append(channelList, make(chan []int))
 		tempLists = append(tempLists, numberList)
 		actualLists = append(actualLists, numberList)
-		// lado := true
-		// if i > 2 {
-		// 	lado = false
-		// }
-		// newGraph := createGraph(3.4*float32(i), newList, color, lado, algorithmsName[i])
-		// graphList = append(graphList, newGraph)
 	}
 
 	//INICIA CADA ALGORITMO CON CORRUTINAS
@@ -110,6 +101,7 @@ func main() {
 	go algorithms.SelectionSort(numberLists[4], channelList[4], stopCh, msgCh)
 	go algorithms.BubbleSort(numberLists[5], channelList[5], stopCh, msgCh)
 
+	//INICIA LA VENTANA
 	runtime.LockOSThread()
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("failed to initialize glfw:", err)
@@ -122,61 +114,73 @@ func main() {
 	window = initGlfw()
 	initOpenGL()
 
+	//INICIA LOS GRAFICOS
+	color := []bool{true, false, true}
+	var graphList []*graph //Lista de graficos
+	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
+	for i := 0; i < 6; i++ {
+		lado := false
+		if i > 2 {
+			lado = true
+		}
+		newGraph := createGraph(3.4*float32(i), numberLists[i], color, lado, algorithmsName[i])
+		graphList = append(graphList, newGraph)
+	}
+
 	font, _ = glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
+
 	gl.Enable(gl.SCISSOR_TEST)
 	for !window.ShouldClose() {
 		select {
 		case actualLists[0] = <-channelList[0]:
-			gl.Scissor(0, 0, 1280, 117)
+			gl.Scissor(0, 0, 640, 117)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-			tempLists[0], _ = checkStatus(actualLists[0], tempLists[0])
-			// graphList[0].updateBarsGraph(tempLists[0])
-			// graphList[0].drawGraph()
-			drawGraph(3.4*float32(0), tempLists[0], algorithmsColors[0], false, algorithmsName[0], 100)
+			tempLists[0], graphList[0].color = checkStatus(actualLists[0], tempLists[0])
+			graphList[0].updateGraph(tempLists[0])
+			graphList[0].drawGraph()
 		case actualLists[1] = <-channelList[1]:
 			gl.Scissor(0, 117, 1280, 117)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-			tempLists[1], _ = checkStatus(actualLists[1], tempLists[1])
-			// graphList[1].updateBarsGraph(tempLists[1])
-			// graphList[1].drawGraph()
-			drawGraph(3.4*float32(1), tempLists[1], algorithmsColors[1], false, algorithmsName[1], 100)
+			tempLists[1], graphList[0].color = checkStatus(actualLists[1], tempLists[1])
+			graphList[1].updateGraph(tempLists[1])
+			graphList[1].drawGraph()
 		case actualLists[2] = <-channelList[2]:
 			gl.Scissor(0, 234, 1280, 117)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-			tempLists[2], _ = checkStatus(actualLists[2], tempLists[2])
-			// graphList[2].updateBarsGraph(tempLists[2])
-			// graphList[2].drawGraph()
-			drawGraph(3.4*float32(2), tempLists[2], algorithmsColors[2], false, algorithmsName[2], 100)
+			tempLists[2], graphList[0].color = checkStatus(actualLists[2], tempLists[2])
+			graphList[2].updateGraph(tempLists[2])
+			graphList[2].drawGraph()
 		case actualLists[3] = <-channelList[3]:
 			gl.Scissor(0, 351, 1280, 117)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-			tempLists[3], _ = checkStatus(actualLists[3], tempLists[3])
-			// graphList[3].updateBarsGraph(tempLists[3])
-			// graphList[3].drawGraph()
-			drawGraph(3.4*float32(3), tempLists[3], algorithmsColors[0], true, algorithmsName[3], 800)
+			tempLists[3], graphList[0].color = checkStatus(actualLists[3], tempLists[3])
+			graphList[3].updateGraph(tempLists[3])
+			graphList[3].drawGraph()
 		case actualLists[4] = <-channelList[4]:
 			gl.Scissor(0, 468, 1280, 117)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-			tempLists[4], _ = checkStatus(actualLists[4], tempLists[4])
-			// graphList[4].updateBarsGraph(tempLists[4])
-			// graphList[4].drawGraph()
-			drawGraph(3.4*float32(4), tempLists[4], algorithmsColors[0], true, algorithmsName[4], 800)
+			tempLists[4], graphList[0].color = checkStatus(actualLists[4], tempLists[4])
+			graphList[4].updateGraph(tempLists[4])
+			graphList[4].drawGraph()
 		case actualLists[5] = <-channelList[5]:
 			gl.Scissor(0, 585, 1280, 117)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-			tempLists[5], _ = checkStatus(actualLists[5], tempLists[5])
-			// graphList[5].updateBarsGraph(tempLists[5])
-			// graphList[5].drawGraph()
-			drawGraph(3.4*float32(5), tempLists[5], algorithmsColors[0], true, algorithmsName[5], 800)
+			tempLists[5], graphList[0].color = checkStatus(actualLists[5], tempLists[5])
+			graphList[5].updateGraph(tempLists[5])
+			graphList[5].drawGraph()
 		}
+
+		// gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		// for data := 0; data < len(channelList); data++ {
 		// 	actualLists[data] = <-channelList[data]
-		// 	tempLists[data], color = checkStatus(actualLists[data], tempLists[data])
-		// 	if data < 3 {
-		// 		drawGraph(3.4*float32(data), tempLists[data], color, false, algorithmsName[data], 100)
-		// 	} else {
-		// 		drawGraph(3.4*float32(data), tempLists[data], color, true, algorithmsName[data], 800)
-		// 	}
+		// 	tempLists[data], graphList[0].color = checkStatus(actualLists[data], tempLists[data])
+		// 	graphList[data].updateGraph(tempLists[data])
+		// 	graphList[data].drawGraph()
+		// 	// if data < 3 {
+		// 	// 	drawGraph(3.4*float32(data), tempLists[data], color, false, algorithmsName[data], 100)
+		// 	// } else {
+		// 	// 	drawGraph(3.4*float32(data), tempLists[data], color, true, algorithmsName[data], 800)
+		// 	// }
 		// }
 		glfw.PollEvents()
 		window.SwapBuffers()
@@ -185,24 +189,68 @@ func main() {
 	close(msgCh)
 }
 
-func drawGraph(y float32, data []int, color []bool, lado bool, name string, x float32) {
-	setBars(y, data, color, lado)
-	font.Printf(x, ((y/3.4)+0.7)*120, 1.2, name) //x,y,scale,string,printf args
-}
-
 func checkStatus(channelData []int, tempData []int) ([]int, []bool) {
 	if len(channelData) == 0 {
-		return tempData, []bool{true, false, false}
+		return tempData, []bool{false, true, false}
 	} else {
-		return channelData, []bool{true, false, false}
+		return channelData, []bool{true, false, true}
 	}
 }
-func setBars(y float32, data []int, color []bool, lado bool) {
-	for x := range data {
-		newBar(x, y, data[x], color, lado)
+
+//======================FUNCIONES DEl GRAFICO======================================
+
+func createGraph(yPos float32, data []int, color []bool, lado bool, algorithmName string) *graph {
+	var newBars []*bar
+	for i := 0; i < len(data); i++ {
+		newB := createBar(float32(i), yPos, data[i], color, lado)
+		newBars = append(newBars, newB)
+	}
+
+	newGraph := &graph{
+		yPosition: yPos,
+		color:     color,
+		bars:      newBars,
+		lado:      lado,
+		name:      algorithmName,
+	}
+	return newGraph
+}
+func (g *graph) drawGraph() {
+
+	x := 800
+	if g.lado {
+		x = 100
+	}
+	font.Printf(float32(x), ((g.yPosition)+0.7)*120, 1.2, g.name) //x,y,scale,string,printf args
+
+	for i := 0; i < len(g.bars); i++ {
+		g.bars[i].drawBar()
 	}
 }
-func newBar(x int, y float32, value int, color []bool, izqDer bool) bar {
+func (g *graph) updateGraph(data []int) {
+
+	//UPDATE EACH BAR: va a funcionar cuando los algoritmos retornen solo un elemento o indice
+	for i := 0; i < len(data); i++ {
+		g.bars[i].setDrawable(float32(i), g.yPosition, data[i], g.lado)
+		g.bars[i].index = float32(i)
+		g.bars[i].value = data[i]
+	}
+}
+
+//======================FUNCIONES DE LA BARRA======================================
+
+func createBar(x, y float32, value int, color []bool, lado bool) *bar {
+	bar := bar{
+		color: color,
+		value: value,
+		index: x,
+	}
+	bar.setDrawable(x, y, value, lado)
+	return &bar
+}
+
+//Antes newBar
+func (c *bar) setDrawable(x, y float32, value int, izqDer bool) {
 	points := make([]float32, len(rectangle), len(rectangle))
 	copy(points, rectangle)
 
@@ -211,11 +259,10 @@ func newBar(x int, y float32, value int, color []bool, izqDer bool) bar {
 		switch i % 3 {
 		case 0:
 			size = (2.0 / float32(columns)) / 2
-			position = float32(x) * size / 2 // POSITION
+			position = x * size / 2 // POSITION
+			m = 1
 			if izqDer == false {
 				m = 0
-			} else {
-				m = 1
 			}
 		case 1:
 			size = (float32(value) / float32(rows)) / 2
@@ -231,28 +278,11 @@ func newBar(x int, y float32, value int, color []bool, izqDer bool) bar {
 			points[i] = (((position + size) * 2) - 1) + m
 		}
 	}
-
-	bar := bar{
-		drawable: makeVao(points),
-		color:    color,
-	}
-
-	bar.draw()
-	return bar
+	c.drawable = makeVao(points)
 }
-
-//FUNCIONES DE LA BARRA
-func (c *bar) draw() {
-	c.colorTest = append(c.colorTest, 0.5, 0.5, 0.5)
+func (c *bar) drawBar() {
 	gl.ColorMask(true, false, true, false)
-
-	gl.EnableClientState(gl.VERTEX_ARRAY)
 	gl.BindVertexArray(c.drawable)
-
-	gl.EnableClientState(gl.COLOR_ARRAY)
-	//gl.ColorPointer(3, gl.FLOAT, 0, unsafe.Pointer(&c.colorTest[0]))
-	//gl.Color3i(255, 0, 0)
-
 	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(rectangle)/3))
 }
 func makeVao(points []float32) uint32 {
@@ -270,6 +300,9 @@ func makeVao(points []float32) uint32 {
 
 	return vao
 }
+
+//======================FUNCIONES DE LA VENTANA======================================
+
 func initGlfw() *glfw.Window {
 	window, _ := glfw.CreateWindow(int(width), int(height), "THE BEST SORT VISUALIZER", nil, nil)
 	window.MakeContextCurrent()
