@@ -3,7 +3,8 @@ package main
 import (
 	"log"
 	"runtime"
-	"time"
+
+	"../algorithms"
 
 	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
@@ -93,15 +94,14 @@ func main() {
 	}
 
 	//INICIA CADA ALGORITMO CON CORRUTINAS
-	// go algorithms.HeapSort(numberLists[0], channelList[0], stopCh, msgCh)
-	// go algorithms.QuickSort(numberLists[1], channelList[1], stopCh, msgCh)
-	// go algorithms.MergeSort(numberLists[2], channelList[2], stopCh, msgCh)
-	// go algorithms.InsertionSort(numberLists[3], channelList[3], stopCh, msgCh)
-	// go algorithms.SelectionSort(numberLists[4], channelList[4], stopCh, msgCh)
-	// go algorithms.BubbleSort(numberLists[5], channelList[5], stopCh, msgCh)
+	go algorithms.HeapSort(numberLists[0], channelList[0], stopCh, msgCh)
+	go algorithms.QuickSort(numberLists[1], channelList[1], stopCh, msgCh)
+	go algorithms.MergeSort(numberLists[2], channelList[2], stopCh, msgCh)
+	go algorithms.InsertionSort(numberLists[3], channelList[3], stopCh, msgCh)
+	go algorithms.SelectionSort(numberLists[4], channelList[4], stopCh, msgCh)
+	go algorithms.BubbleSort(numberLists[5], channelList[5], stopCh, msgCh)
 
 	//INICIA LA VENTANA
-	go drawInWindow()
 	runtime.LockOSThread()
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("failed to initialize glfw:", err)
@@ -113,23 +113,81 @@ func main() {
 
 	window = initGlfw()
 	initOpenGL()
+
+	//INICIA LOS GRAFICOS
 	font, _ = glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
+	color := []bool{true, false, true}
+	var graphList []*graph //Lista de graficos
+	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
+	for i := 0; i < 6; i++ {
+		lado := false
+		x := 100
+		if i > 2 {
+			lado = true
+			x = 800
+		}
+		newGraph := createGraph(3.4*float32(i), numberLists[i], color, lado, algorithmsName[i])
+		graphList = append(graphList, newGraph)
+
+		font.Printf(float32(x), (float32(i)+0.7)*120, 1.2, algorithmsName[i])
+		window.SwapBuffers()
+		font.Printf(float32(x), (float32(i)+0.7)*120, 1.2, algorithmsName[i])
+	}
+
 	gl.Enable(gl.SCISSOR_TEST)
+
 	for !window.ShouldClose() {
-		//gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		select {
+		case actualLists[0] = <-channelList[0]:
+			gl.Scissor(0, 0, 640, 117)
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			tempLists[0], graphList[0].color = checkStatus(actualLists[0], tempLists[0])
+			graphList[0].updateGraph(tempLists[0])
+			graphList[0].drawGraph()
+		case actualLists[1] = <-channelList[1]:
+			gl.Scissor(0, 117, 640, 117)
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			tempLists[1], graphList[0].color = checkStatus(actualLists[1], tempLists[1])
+			graphList[1].updateGraph(tempLists[1])
+			graphList[1].drawGraph()
+		case actualLists[2] = <-channelList[2]:
+			gl.Scissor(0, 234, 640, 117)
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			tempLists[2], graphList[0].color = checkStatus(actualLists[2], tempLists[2])
+			graphList[2].updateGraph(tempLists[2])
+			graphList[2].drawGraph()
+		case actualLists[3] = <-channelList[3]:
+			gl.Scissor(640, 351, 640, 117)
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			tempLists[3], graphList[0].color = checkStatus(actualLists[3], tempLists[3])
+			graphList[3].updateGraph(tempLists[3])
+			graphList[3].drawGraph()
+		case actualLists[4] = <-channelList[4]:
+			gl.Scissor(640, 468, 640, 117)
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			tempLists[4], graphList[0].color = checkStatus(actualLists[4], tempLists[4])
+			graphList[4].updateGraph(tempLists[4])
+			graphList[4].drawGraph()
+		case actualLists[5] = <-channelList[5]:
+			gl.Scissor(640, 585, 640, 117)
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			tempLists[5], graphList[0].color = checkStatus(actualLists[5], tempLists[5])
+			graphList[5].updateGraph(tempLists[5])
+			graphList[5].drawGraph()
+		}
+
+		// gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		// for data := 0; data < len(channelList); data++ {
+		// 	actualLists[data] = <-channelList[data]
+		// 	tempLists[data], graphList[0].color = checkStatus(actualLists[data], tempLists[data])
+		// 	graphList[data].updateGraph(tempLists[data])
+		// 	graphList[data].drawGraph()
+		// }
 		glfw.PollEvents()
 		window.SwapBuffers()
 	}
-
 	close(stopCh) //Cerrando este canal cerramos los demas canales en cada algoritmo
 	close(msgCh)
-}
-func drawInWindow() {
-	time.Sleep(3 * time.Second)
-	for i := 0; i < 5; i++ {
-		log.Println("entro")
-		font.Printf(100, float32((i+1)*100), 1.2, "hola")
-	}
 }
 
 func checkStatus(channelData []int, tempData []int) ([]int, []bool) {
