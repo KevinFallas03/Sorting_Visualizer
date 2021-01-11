@@ -100,3 +100,14 @@ MergeSort:
   Condición de un ciclo = 199
 =====================================
 
+=======================CORRIDA========
+
+HeapSort:
+  Tiempo inicio = 21:46:31
+  Tiempo final = 21:46:33
+  Tiempo total = 1.9415447s
+  Intercambio de valores = 565
+  Comparación entre valores = 1637
+  Condición de un ciclo = 99
+=====================================
+
