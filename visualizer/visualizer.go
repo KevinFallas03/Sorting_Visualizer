@@ -83,16 +83,26 @@ func main() {
 	var numberLists [][]int       //Lista de listas de numeros
 	stopCh := make(chan struct{}) //Canal para detener todo
 
+	color := []bool{true, false, true}
+	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
+
 	//INICIALIZA TODOS LOS DATOS
 	for i := 0; i < 6; i++ {
 		newList := make([]int, len(numberList), len(numberList))
 		copy(newList, numberList)
 		numberLists = append(numberLists, newList)
 		channelList = append(channelList, make(chan []int))
+
+		lado := false
+		if i > 2 {
+			lado = true
+		}
+		newGraph := createGraph(3.4*float32(i), numberLists[i], color, lado, algorithmsName[i])
+		graphList = append(graphList, newGraph)
 	}
 
 	//INICIA CADA ALGORITMO CON CORRUTINAS
-	go algorithms.HeapSort(numberLists[0], channelList[0], stopCh, msgCh)
+	go algorithms.HeapSort(graphList[0].bars, channelList[0], stopCh, msgCh)
 	// go algorithms.QuickSort(numberLists[1], channelList[1], stopCh, msgCh)
 	// go algorithms.MergeSort(numberLists[2], channelList[2], stopCh, msgCh)
 	// go algorithms.InsertionSort(numberLists[3], channelList[3], stopCh, msgCh)
@@ -112,20 +122,13 @@ func main() {
 	window = initGlfw()
 	initOpenGL()
 
-	//INICIA LOS GRAFICOS
+	//DIBUJA LAS ETIQUETAS
 	font, _ = glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
-	color := []bool{true, false, true}
-	algorithmsName := [6]string{"BubbleSort", "SelectionSort", "InsertionSort", "MergeSort", "QuickSort", "HeapSort"}
 	for i := 0; i < 6; i++ {
-		lado := false
 		x := 100
 		if i > 2 {
-			lado = true
 			x = 800
 		}
-		newGraph := createGraph(3.4*float32(i), numberLists[i], color, lado, algorithmsName[i])
-		graphList = append(graphList, newGraph)
-
 		font.Printf(float32(x), (float32(i)+0.7)*120, 1.2, algorithmsName[i])
 		window.SwapBuffers()
 		font.Printf(float32(x), (float32(i)+0.7)*120, 1.2, algorithmsName[i])
@@ -156,6 +159,7 @@ func main() {
 		// 	graphList[data].updateGraph(tempLists[data])
 		// 	graphList[data].drawGraph()
 		// }
+
 		glfw.PollEvents()
 
 	}
@@ -175,7 +179,6 @@ func drawInWindow(xCut, yCut int32, currentList []int, index int) {
 		//Pinta el grafico en ambos buffers
 		graphList[index].drawGraph()
 		window.SwapBuffers()
-		graphList[index].drawGraph()
 	}
 }
 

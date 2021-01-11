@@ -1,13 +1,8 @@
 package algorithms
 
-import (
-	"strconv"
-	"time"
-)
-
 //MergeSort initialize the sorting
 func MergeSort(data []int, c chan []int, stopCh chan struct{}, msgCh chan string) {
-	t := time.Now()
+	//t := time.Now()
 	swaps := 0
 	comparations := 0
 	loops := 0
@@ -16,9 +11,9 @@ func MergeSort(data []int, c chan []int, stopCh chan struct{}, msgCh chan string
 	m := MergeSortAux(data, c, stopCh, msgCh, &swaps, &comparations, &loops)
 	if !closed {
 		c <- m
-		hi, mi, si := t.Clock()
-		hf, mf, sf := time.Now().Clock()
-		msgCh <- "\nMergeSort:" + "\n  Tiempo inicio = " + strconv.Itoa(hi) + ":" + strconv.Itoa(mi) + ":" + strconv.Itoa(si) + "\n  Tiempo final = " + strconv.Itoa(hf) + ":" + strconv.Itoa(mf) + ":" + strconv.Itoa(sf) + "\n  Tiempo total = " + time.Since(t).String() + "\n  Intercambio de valores = " + strconv.Itoa(swaps) + "\n  Comparación entre valores = " + strconv.Itoa(comparations) + "\n  Condición de un ciclo = " + strconv.Itoa(loops)
+		// hi, mi, si := t.Clock()
+		// hf, mf, sf := time.Now().Clock()
+		// msgCh <- "\nMergeSort:" + "\n  Tiempo inicio = " + strconv.Itoa(hi) + ":" + strconv.Itoa(mi) + ":" + strconv.Itoa(si) + "\n  Tiempo final = " + strconv.Itoa(hf) + ":" + strconv.Itoa(mf) + ":" + strconv.Itoa(sf) + "\n  Tiempo total = " + time.Since(t).String() + "\n  Intercambio de valores = " + strconv.Itoa(swaps) + "\n  Comparación entre valores = " + strconv.Itoa(comparations) + "\n  Condición de un ciclo = " + strconv.Itoa(loops)
 		close(c)
 	}
 }
