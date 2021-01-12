@@ -1,7 +1,9 @@
 package algorithms
 
+import "fmt"
+
 //BubbleSort ...
-func BubbleSort(data []int, c chan []int, stopCh chan struct{}, msgCh chan string) {
+func BubbleSort(data [][]int, c chan []int, stopCh chan struct{}, msgCh chan string) {
 	swaps := 0
 	comparations := 0
 	loops := 0
@@ -11,17 +13,20 @@ func BubbleSort(data []int, c chan []int, stopCh chan struct{}, msgCh chan strin
 		loops++
 		for j := 1; j < len(data)-i; j++ {
 			comparations++
-			if data[j] < data[j-1] {
+			if data[j][0] < data[j-1][0] {
 				data[j], data[j-1] = data[j-1], data[j]
+				select {
+				case <-stopCh:
+					close(c)
+					return
+				//case c <- data:
+				case c <- []int{data[j][1], data[j-1][1]}:
+				}
+				fmt.Println("bs->", data)
 				swaps++
 			}
 		}
-		select {
-		case <-stopCh:
-			close(c)
-			return
-		case c <- data:
-		}
+
 	}
 
 	// hi, mi, si := t.Clock()
