@@ -1,9 +1,7 @@
 package algorithms
 
-import "fmt"
-
 //BubbleSort ...
-func BubbleSort(data [][]int, c chan []int, stopCh chan struct{}, msgCh chan string) {
+func BubbleSort(data [][]int, c chan [][]int, stopCh chan struct{}, msgCh chan string) {
 	swaps := 0
 	comparations := 0
 	loops := 0
@@ -14,23 +12,23 @@ func BubbleSort(data [][]int, c chan []int, stopCh chan struct{}, msgCh chan str
 		for j := 1; j < len(data)-i; j++ {
 			comparations++
 			if data[j][0] < data[j-1][0] {
-				data[j], data[j-1] = data[j-1], data[j]
+
+				data[j][0], data[j-1][0] = data[j-1][0], data[j][0]
 				select {
 				case <-stopCh:
 					close(c)
 					return
-				//case c <- data:
-				case c <- []int{data[j][1], data[j-1][1]}:
+					//case c <- data:
+				case c <- [][]int{data[j], data[j-1]}:
 				}
-				fmt.Println("bs->", data)
 				swaps++
 			}
 		}
-
 	}
 
 	// hi, mi, si := t.Clock()
 	// hf, mf, sf := time.Now().Clock()
 	// msgCh <- "\nBubbleSort:" + "\n  Tiempo inicio = " + strconv.Itoa(hi) + ":" + strconv.Itoa(mi) + ":" + strconv.Itoa(si) + "\n  Tiempo final = " + strconv.Itoa(hf) + ":" + strconv.Itoa(mf) + ":" + strconv.Itoa(sf) + "\n  Tiempo total = " + time.Since(t).String() + "\n  Intercambio de valores = " + strconv.Itoa(swaps) + "\n  Comparación entre valores = " + strconv.Itoa(comparations) + "\n  Condición de un ciclo = " + strconv.Itoa(loops)
+
 	close(c)
 }

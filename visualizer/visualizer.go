@@ -31,8 +31,8 @@ var (
 	}
 	window      *glfw.Window
 	font        *glfont.Font
-	channelList []chan []int //Lista de canales
-	graphList   []*graph     //Lista de graficos
+	channelList []chan [][]int //Lista de canales
+	graphList   []*graph       //Lista de graficos
 )
 
 type bar struct {
@@ -43,7 +43,7 @@ type bar struct {
 }
 
 type graph struct {
-	bars      []bar
+	bars      []*bar
 	color     []bool
 	yPosition float32
 	lado      bool
@@ -92,7 +92,7 @@ func main() {
 		newList := make([][]int, len(numberList), len(numberList))
 		copy(newList, numberList)
 		numberLists = append(numberLists, newList)
-		channelList = append(channelList, make(chan []int))
+		channelList = append(channelList, make(chan [][]int))
 	}
 
 	//INICIA CADA ALGORITMO CON CORRUTINAS
@@ -122,15 +122,15 @@ func main() {
 		x := 100
 		lado := false
 		if i > 2 {
-			lado = true
 			x = 800
+			lado = true
 		}
-		newGraph := createGraph(3.4*float32(i), numberLists[i], color, lado, algorithmsName[i])
-		graphList = append(graphList, newGraph)
-
 		font.Printf(float32(x), (float32(i)+0.7)*120, 1.2, algorithmsName[i])
 		window.SwapBuffers()
 		font.Printf(float32(x), (float32(i)+0.7)*120, 1.2, algorithmsName[i])
+
+		newGraph := createGraph(3.4*float32(i), numberLists[i], color, lado, algorithmsName[i])
+		graphList = append(graphList, newGraph)
 	}
 
 	gl.Enable(gl.SCISSOR_TEST)
@@ -165,7 +165,7 @@ func main() {
 	close(stopCh) //Cerrando este canal cerramos los demas canales en cada algoritmo
 	close(msgCh)
 }
-func drawInWindow(xCut, yCut int32, currentList []int, index int) {
+func drawInWindow(xCut, yCut int32, currentList [][]int, index int) {
 	if !graphList[index].done { //Si el grafico no se ha terminado de pintar
 		gl.Scissor(xCut, yCut, 640, 117)                    //Seleccionamos la parte de la ventana que queremos actualizar
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) //La limpiamos
@@ -186,7 +186,7 @@ func drawInWindow(xCut, yCut int32, currentList []int, index int) {
 // Crea un grafico nuevo con todos sus atributos.
 // (Posicion en y, color, lista de barras que lo componen, lado de la pantalla donde se ubica, nombre del algoritmo que representa)
 func createGraph(yPos float32, data [][]int, color []bool, lado bool, algorithmName string) *graph {
-	var newBars []bar
+	var newBars []*bar
 	for i := 0; i < len(data); i++ {
 		newB := createBar(float32(i), yPos, data[i][0], color, lado)
 		newBars = append(newBars, newB)
@@ -213,31 +213,30 @@ func (g *graph) drawGraph() {
 
 // Actualiza las barras:
 // V0: Actualiza la lista entera con la lista que recibe del canal del algoritmo.
-func (g *graph) updateGraph(data []int) {
+func (g *graph) updateGraph(data [][]int) {
 
-	// //UPDATE EACH BAR: va a funcionar cuando los algoritmos retornen solo un elemento o indice
-	// for i := 0; i < len(data); i++ {
-	// 	g.bars[i].setDrawable(float32(i), g.yPosition, data[i], g.lado)
-	// 	g.bars[i].index = float32(i)
-	// 	g.bars[i].value = data[i]
-	// }
 	//UPDATE EACH BAR: va a funcionar cuando los algoritmos retornen solo un elemento o indice
 
-	fmt.Println("indices->", data)
-	// fmt.Println("barras->", g.bars)
-	// var toSwap []int
+	// g.bars[data[0][1]], g.bars[data[1][1]] = g.bars[data[1][1]], g.bars[data[0][1]]
+	for i := 0; i < len(g.bars); i++ {
+		if int(g.bars[i].index) == data[1][1] {
+			fmt.Println(i, " ", float32(data[1][1]), " ", g.bars[i].index)
+			g.bars[i].setDrawable(float32(data[1][1]), g.yPosition, data[1][0], g.lado)
+			g.bars[i].index = float32(data[1][1])
+			g.bars[i].value = data[1][0]
+		}
+		if int(g.bars[i].index) == data[0][1] {
+			g.bars[i].setDrawable(float32(data[1][1]), g.yPosition, data[0][0], g.lado)
+			g.bars[i].index = float32(data[0][1])
+			g.bars[i].value = data[0][0]
+		}
+	}
 	// for i := 0; i < len(g.bars); i++ {
-	// 	// g.bars[i].setDrawable(float32(i), g.yPosition, data[i], g.lado)
-	// 	// g.bars[i].index = float32(i)
-	// 	// g.bars[i].value = data[i]
-	// 	if int(g.bars[i].index) == data[0] || int(g.bars[i].index) == data[1] {
-	// 		toSwap = append(toSwap, i)
-	// 	}
+	// 	g.bars[i].setDrawable(float32(data[i][1]), g.yPosition, data[i][0], g.lado)
+	// 	g.bars[i].index = float32(data[i][1])
+	// 	g.bars[i].value = data[i][0]
 	// }
-	// g.bars[toSwap[0]].setDrawable(g.bars[toSwap[1]].index, g.yPosition, g.bars[toSwap[1]].value, g.lado)
-	// g.bars[toSwap[1]].setDrawable(g.bars[toSwap[0]].index, g.yPosition, g.bars[toSwap[0]].value, g.lado)
 
-	g.bars[data[0]].drawable, g.bars[data[1]].drawable = g.bars[data[1]].drawable, g.bars[data[0]].drawable
 }
 
 //Actualiza los colores de las barras respecto a la del grafico
@@ -250,23 +249,23 @@ func (g *graph) updateColor(color []bool) {
 
 // Genera los "drawables" de cada barra: se hace por separado y no a la hora de crear la barra
 // porque se necesita hacer despues de crear la ventana.
-func (g *graph) setDrawables() {
-	for i := 0; i < len(g.bars); i++ {
-		g.bars[i].setDrawable(g.bars[i].index, g.yPosition, g.bars[i].value, g.lado)
-	}
-}
+// func (g *graph) setDrawables() {
+// 	for i := 0; i < len(g.bars); i++ {
+// 		g.bars[i].setDrawable(g.bars[i].index, g.yPosition, g.bars[i].value, g.lado)
+// 	}
+// }
 
 //======================FUNCIONES DE LA BARRA======================================
 
 //Crea una barra con todos sus atributos: (color, valor, indice en la lista).
-func createBar(x, y float32, value int, color []bool, lado bool) bar {
+func createBar(x, y float32, value int, color []bool, lado bool) *bar {
 	bar := bar{
 		color: color,
 		value: value,
 		index: x,
 	}
 	bar.setDrawable(x, y, value, lado)
-	return bar
+	return &bar
 }
 
 //Genera y establece el drawable para la barra, es el objeto que se pintara.
