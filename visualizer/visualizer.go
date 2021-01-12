@@ -71,7 +71,7 @@ func generateList(n int, x int, m int) [][]int {
 
 //Start ...
 func main() {
-	n := 10
+	n := 100
 	x := 101
 	m := 2048
 	msgCh := make(chan string)
@@ -93,13 +93,6 @@ func main() {
 		copy(newList, numberList)
 		numberLists = append(numberLists, newList)
 		channelList = append(channelList, make(chan []int))
-
-		lado := false
-		if i > 2 {
-			lado = true
-		}
-		newGraph := createGraph(3.4*float32(i), numberLists[i], color, lado, algorithmsName[i])
-		graphList = append(graphList, newGraph)
 	}
 
 	//INICIA CADA ALGORITMO CON CORRUTINAS
@@ -126,11 +119,15 @@ func main() {
 	//DIBUJA LAS ETIQUETAS
 	font, _ = glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
 	for i := 0; i < 6; i++ {
-		graphList[i].setDrawables()
 		x := 100
+		lado := false
 		if i > 2 {
+			lado = true
 			x = 800
 		}
+		newGraph := createGraph(3.4*float32(i), numberLists[i], color, lado, algorithmsName[i])
+		graphList = append(graphList, newGraph)
+
 		font.Printf(float32(x), (float32(i)+0.7)*120, 1.2, algorithmsName[i])
 		window.SwapBuffers()
 		font.Printf(float32(x), (float32(i)+0.7)*120, 1.2, algorithmsName[i])
@@ -239,6 +236,7 @@ func (g *graph) updateGraph(data []int) {
 	// }
 	// g.bars[toSwap[0]].setDrawable(g.bars[toSwap[1]].index, g.yPosition, g.bars[toSwap[1]].value, g.lado)
 	// g.bars[toSwap[1]].setDrawable(g.bars[toSwap[0]].index, g.yPosition, g.bars[toSwap[0]].value, g.lado)
+
 	g.bars[data[0]].drawable, g.bars[data[1]].drawable = g.bars[data[1]].drawable, g.bars[data[0]].drawable
 }
 
@@ -267,7 +265,7 @@ func createBar(x, y float32, value int, color []bool, lado bool) bar {
 		value: value,
 		index: x,
 	}
-	//bar.setDrawable(x, y, value, lado)
+	bar.setDrawable(x, y, value, lado)
 	return bar
 }
 
