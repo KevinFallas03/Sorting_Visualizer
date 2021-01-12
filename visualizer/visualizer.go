@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"runtime"
 
@@ -43,7 +42,7 @@ type bar struct {
 }
 
 type graph struct {
-	bars      []bar
+	bars      []*bar
 	color     []bool
 	yPosition float32
 	lado      bool
@@ -53,7 +52,7 @@ type graph struct {
 
 //generateList crea una lista de numeros aleatorios con el metodo de
 //congruncia lineal multiplicativa
-func generateList(n int, x int, m int) [][]int {
+func generateList(n int, x int, m int) []int {
 	//  x es la semilla. Debe de ser primo entre [11, 101]  0 <= x < m
 	//  n es la cantidad.
 	//  1103515245, 12345,
@@ -61,17 +60,17 @@ func generateList(n int, x int, m int) [][]int {
 	var a int = 1103515245 //    0 < a < m multiplicador
 	var c int = 12345      //      0 <= c < m  Incremento
 
-	var nums [][]int
+	var nums []int
 	for i := 0; i < n; i++ {
 		x = (a*x + c) % m
-		nums = append(nums, []int{x % 31, i})
+		nums = append(nums, x%31)
 	}
 	return nums
 }
 
 //Start ...
 func main() {
-	n := 10
+	n := 200
 	x := 101
 	m := 2048
 	msgCh := make(chan string)
@@ -81,7 +80,7 @@ func main() {
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
 
 	//GENERA DATA PARA LOS ALGORITMOS
-	var numberLists [][][]int     //Lista de listas de numeros
+	var numberLists [][]int       //Lista de listas de numeros
 	stopCh := make(chan struct{}) //Canal para detener todo
 
 	color := []bool{true, false, true}
@@ -89,7 +88,7 @@ func main() {
 
 	//INICIALIZA TODOS LOS DATOS
 	for i := 0; i < 6; i++ {
-		newList := make([][]int, len(numberList), len(numberList))
+		newList := make([]int, len(numberList), len(numberList))
 		copy(newList, numberList)
 		numberLists = append(numberLists, newList)
 		channelList = append(channelList, make(chan []int))
@@ -103,12 +102,12 @@ func main() {
 	}
 
 	//INICIA CADA ALGORITMO CON CORRUTINAS
-	//go algorithms.HeapSort(numberLists[0], channelList[0], stopCh, msgCh)
+	go algorithms.HeapSort(graphList[0].bars, channelList[0], stopCh, msgCh)
 	// go algorithms.QuickSort(numberLists[1], channelList[1], stopCh, msgCh)
 	// go algorithms.MergeSort(numberLists[2], channelList[2], stopCh, msgCh)
 	// go algorithms.InsertionSort(numberLists[3], channelList[3], stopCh, msgCh)
 	// go algorithms.SelectionSort(numberLists[4], channelList[4], stopCh, msgCh)
-	go algorithms.BubbleSort(numberLists[5], channelList[5], stopCh, msgCh)
+	// go algorithms.BubbleSort(numberLists[5], channelList[5], stopCh, msgCh)
 
 	//INICIA LA VENTANA
 	runtime.LockOSThread()
@@ -126,7 +125,6 @@ func main() {
 	//DIBUJA LAS ETIQUETAS
 	font, _ = glfont.LoadFont("Roboto-Light.ttf", int32(52), width, height)
 	for i := 0; i < 6; i++ {
-		graphList[i].setDrawables()
 		x := 100
 		if i > 2 {
 			x = 800
@@ -188,10 +186,10 @@ func drawInWindow(xCut, yCut int32, currentList []int, index int) {
 
 // Crea un grafico nuevo con todos sus atributos.
 // (Posicion en y, color, lista de barras que lo componen, lado de la pantalla donde se ubica, nombre del algoritmo que representa)
-func createGraph(yPos float32, data [][]int, color []bool, lado bool, algorithmName string) *graph {
-	var newBars []bar
+func createGraph(yPos float32, data []int, color []bool, lado bool, algorithmName string) *graph {
+	var newBars []*bar
 	for i := 0; i < len(data); i++ {
-		newB := createBar(float32(i), yPos, data[i][0], color, lado)
+		newB := createBar(float32(i), yPos, data[i], color, lado)
 		newBars = append(newBars, newB)
 	}
 
@@ -218,28 +216,12 @@ func (g *graph) drawGraph() {
 // V0: Actualiza la lista entera con la lista que recibe del canal del algoritmo.
 func (g *graph) updateGraph(data []int) {
 
-	// //UPDATE EACH BAR: va a funcionar cuando los algoritmos retornen solo un elemento o indice
-	// for i := 0; i < len(data); i++ {
-	// 	g.bars[i].setDrawable(float32(i), g.yPosition, data[i], g.lado)
-	// 	g.bars[i].index = float32(i)
-	// 	g.bars[i].value = data[i]
-	// }
 	//UPDATE EACH BAR: va a funcionar cuando los algoritmos retornen solo un elemento o indice
-
-	fmt.Println("indices->", data)
-	// fmt.Println("barras->", g.bars)
-	// var toSwap []int
-	// for i := 0; i < len(g.bars); i++ {
-	// 	// g.bars[i].setDrawable(float32(i), g.yPosition, data[i], g.lado)
-	// 	// g.bars[i].index = float32(i)
-	// 	// g.bars[i].value = data[i]
-	// 	if int(g.bars[i].index) == data[0] || int(g.bars[i].index) == data[1] {
-	// 		toSwap = append(toSwap, i)
-	// 	}
-	// }
-	// g.bars[toSwap[0]].setDrawable(g.bars[toSwap[1]].index, g.yPosition, g.bars[toSwap[1]].value, g.lado)
-	// g.bars[toSwap[1]].setDrawable(g.bars[toSwap[0]].index, g.yPosition, g.bars[toSwap[0]].value, g.lado)
-	g.bars[data[0]].drawable, g.bars[data[1]].drawable = g.bars[data[1]].drawable, g.bars[data[0]].drawable
+	for i := 0; i < len(data); i++ {
+		g.bars[i].setDrawable(float32(i), g.yPosition, data[i], g.lado)
+		g.bars[i].index = float32(i)
+		g.bars[i].value = data[i]
+	}
 }
 
 //Actualiza los colores de las barras respecto a la del grafico
@@ -261,14 +243,14 @@ func (g *graph) setDrawables() {
 //======================FUNCIONES DE LA BARRA======================================
 
 //Crea una barra con todos sus atributos: (color, valor, indice en la lista).
-func createBar(x, y float32, value int, color []bool, lado bool) bar {
+func createBar(x, y float32, value int, color []bool, lado bool) *bar {
 	bar := bar{
 		color: color,
 		value: value,
 		index: x,
 	}
 	//bar.setDrawable(x, y, value, lado)
-	return bar
+	return &bar
 }
 
 //Genera y establece el drawable para la barra, es el objeto que se pintara.
