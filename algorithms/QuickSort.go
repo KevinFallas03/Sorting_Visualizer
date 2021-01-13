@@ -26,7 +26,6 @@ func QuickSort(data []int, c chan [][]int, stopCh chan struct{}, msgCh chan stri
 }
 
 func quickSortAux(a []int, c chan [][]int, stopCh chan struct{}, msgCh chan string, swaps, comparations, loops *int) []int {
-	*loops++
 	if len(a) < 2 {
 		return a
 	}
@@ -38,6 +37,7 @@ func quickSortAux(a []int, c chan [][]int, stopCh chan struct{}, msgCh chan stri
 	a[pivot], a[right] = a[right], a[pivot]
 
 	for i := range a {
+		*loops++
 		*comparations++
 		if a[i] < a[right] {
 			*swaps++

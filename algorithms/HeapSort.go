@@ -9,12 +9,11 @@ import (
 func HeapSort(data []int, c chan [][]int, stopCh chan struct{}, msgCh chan string) {
 	t := time.Now()
 	swaps := 0
-	comparations := 0
+	comparisons := 0
 	loops := 0
 
-	heapify(data, &swaps, &comparations, &loops, c)
+	heapify(data, &swaps, &comparisons, &loops, c)
 	for i := len(data) - 1; i > 0; i-- {
-		loops++
 		swaps++
 		data[0], data[i] = data[i], data[0]
 		select {
@@ -23,33 +22,34 @@ func HeapSort(data []int, c chan [][]int, stopCh chan struct{}, msgCh chan strin
 			return
 		case c <- [][]int{[]int{data[0], 0}, []int{data[i], i}}:
 		}
-		siftDown(data, 0, i, &swaps, &comparations, &loops, c)
+		siftDown(data, 0, i, &swaps, &comparisons, &loops, c)
 
 	}
 
 	hi, mi, si := t.Clock()
 	hf, mf, sf := time.Now().Clock()
-	msgCh <- "\nHeapSort:" + "\n  Tiempo inicio = " + strconv.Itoa(hi) + ":" + strconv.Itoa(mi) + ":" + strconv.Itoa(si) + "\n  Tiempo final = " + strconv.Itoa(hf) + ":" + strconv.Itoa(mf) + ":" + strconv.Itoa(sf) + "\n  Tiempo total = " + time.Since(t).String() + "\n  Intercambio de valores = " + strconv.Itoa(swaps) + "\n  Comparación entre valores = " + strconv.Itoa(comparations) + "\n  Condición de un ciclo = " + strconv.Itoa(loops)
+	msgCh <- "\nHeapSort:" + "\n  Tiempo inicio = " + strconv.Itoa(hi) + ":" + strconv.Itoa(mi) + ":" + strconv.Itoa(si) + "\n  Tiempo final = " + strconv.Itoa(hf) + ":" + strconv.Itoa(mf) + ":" + strconv.Itoa(sf) + "\n  Tiempo total = " + time.Since(t).String() + "\n  Intercambio de valores = " + strconv.Itoa(swaps) + "\n  Comparación entre valores = " + strconv.Itoa(comparisons) + "\n  Condición de un ciclo = " + strconv.Itoa(loops)
 	close(c)
 }
-func heapify(data []int, swaps, comparations, loops *int, c chan [][]int) {
+func heapify(data []int, swaps, comparisons, loops *int, c chan [][]int) {
 	for i := (len(data) - 1) / 2; i >= 0; i-- {
-		siftDown(data, i, len(data), swaps, comparations, loops, c)
+		siftDown(data, i, len(data), swaps, comparisons, loops, c)
 	}
 }
-func siftDown(heap []int, lo, hi int, swaps, comparations, loops *int, c chan [][]int) {
+func siftDown(heap []int, lo, hi int, swaps, comparisons, loops *int, c chan [][]int) {
 	root := lo
 	for {
+		*loops++
 		child := root*2 + 1
-		*comparations++
+		*comparisons++
 		if child >= hi {
 			break
 		}
-		*comparations++
+		*comparisons++
 		if child+1 < hi && heap[child] < heap[child+1] {
 			child++
 		}
-		*comparations++
+		*comparisons++
 		if heap[root] < heap[child] {
 			*swaps++
 			heap[root], heap[child] = heap[child], heap[root]
