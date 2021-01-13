@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"runtime"
 
@@ -29,10 +28,8 @@ var (
 		0.1, 0.1, 0,
 		0.1, -0.1, 0,
 	}
-	window      *glfw.Window
-	font        *glfont.Font
-	channelList []chan [][]int //Lista de canales
-	graphList   []*graph       //Lista de graficos
+	window *glfw.Window
+	font   *glfont.Font
 )
 
 type bar struct {
@@ -53,7 +50,7 @@ type graph struct {
 
 //generateList crea una lista de numeros aleatorios con el metodo de
 //congruncia lineal multiplicativa
-func generateList(n int, x int, m int) [][]int {
+func generateList(n int, x int, m int) []int {
 	//  x es la semilla. Debe de ser primo entre [11, 101]  0 <= x < m
 	//  n es la cantidad.
 	//  1103515245, 12345,
@@ -61,17 +58,18 @@ func generateList(n int, x int, m int) [][]int {
 	var a int = 1103515245 //    0 < a < m multiplicador
 	var c int = 12345      //      0 <= c < m  Incremento
 
-	var nums [][]int
+	var nums []int
 	for i := 0; i < n; i++ {
 		x = (a*x + c) % m
-		nums = append(nums, []int{x % 31, i})
+		//nums = append(nums, []int{x % 31, i})
+		nums = append(nums, x%31)
 	}
 	return nums
 }
 
 //Start ...
 func main() {
-	n := 100
+	n := 500
 	x := 101
 	m := 2048
 	msgCh := make(chan string)
@@ -80,8 +78,11 @@ func main() {
 	numberList := generateList(n, x, m)
 	columns = len(numberList) + int(float32(len(numberList))*0.05)
 
+	var channelList []chan [][]int //Lista de canales
+	var graphList []*graph         //Lista de graficos
+
 	//GENERA DATA PARA LOS ALGORITMOS
-	var numberLists [][][]int     //Lista de listas de numeros
+	var numberLists [][]int       //Lista de listas de numeros
 	stopCh := make(chan struct{}) //Canal para detener todo
 
 	color := []bool{true, false, true}
@@ -89,18 +90,18 @@ func main() {
 
 	//INICIALIZA TODOS LOS DATOS
 	for i := 0; i < 6; i++ {
-		newList := make([][]int, len(numberList), len(numberList))
+		newList := make([]int, len(numberList), len(numberList))
 		copy(newList, numberList)
 		numberLists = append(numberLists, newList)
 		channelList = append(channelList, make(chan [][]int))
 	}
 
 	//INICIA CADA ALGORITMO CON CORRUTINAS
-	//go algorithms.HeapSort(numberLists[0], channelList[0], stopCh, msgCh)
-	// go algorithms.QuickSort(numberLists[1], channelList[1], stopCh, msgCh)
-	// go algorithms.MergeSort(numberLists[2], channelList[2], stopCh, msgCh)
-	// go algorithms.InsertionSort(numberLists[3], channelList[3], stopCh, msgCh)
-	// go algorithms.SelectionSort(numberLists[4], channelList[4], stopCh, msgCh)
+	go algorithms.HeapSort(numberLists[0], channelList[0], stopCh, msgCh)
+	go algorithms.QuickSort(numberLists[1], channelList[1], stopCh, msgCh)
+	go algorithms.MergeSort(numberLists[2], channelList[2], stopCh, msgCh)
+	go algorithms.InsertionSort(numberLists[3], channelList[3], stopCh, msgCh)
+	go algorithms.SelectionSort(numberLists[4], channelList[4], stopCh, msgCh)
 	go algorithms.BubbleSort(numberLists[5], channelList[5], stopCh, msgCh)
 
 	//INICIA LA VENTANA
@@ -138,17 +139,17 @@ func main() {
 	for !window.ShouldClose() {
 		select {
 		case currentListHP := <-channelList[0]: //HeapSort
-			drawInWindow(0, 0, currentListHP, 0)
+			drawInWindow(0, 0, currentListHP, graphList[0])
 		case currentListQS := <-channelList[1]: //QuickSort
-			drawInWindow(0, 117, currentListQS, 1)
+			drawInWindow(0, 117, currentListQS, graphList[1])
 		case currentListMS := <-channelList[2]: //MergeSort
-			drawInWindow(0, 234, currentListMS, 2)
+			drawInWindow(0, 234, currentListMS, graphList[2])
 		case currentListIS := <-channelList[3]: //InsertionSort
-			drawInWindow(640, 351, currentListIS, 3)
+			drawInWindow(640, 351, currentListIS, graphList[3])
 		case currentListSS := <-channelList[4]: //SelectionSort
-			drawInWindow(640, 468, currentListSS, 4)
+			drawInWindow(640, 468, currentListSS, graphList[4])
 		case currentListBS := <-channelList[5]: //BubbleSort
-			drawInWindow(640, 585, currentListBS, 5)
+			drawInWindow(640, 585, currentListBS, graphList[5])
 		}
 
 		// gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -165,19 +166,21 @@ func main() {
 	close(stopCh) //Cerrando este canal cerramos los demas canales en cada algoritmo
 	close(msgCh)
 }
-func drawInWindow(xCut, yCut int32, currentList [][]int, index int) {
-	if !graphList[index].done { //Si el grafico no se ha terminado de pintar
+func drawInWindow(xCut, yCut int32, currentList [][]int, graph *graph) {
+	if !graph.done { //Si el grafico no se ha terminado de pintar
 		gl.Scissor(xCut, yCut, 640, 117)                    //Seleccionamos la parte de la ventana que queremos actualizar
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) //La limpiamos
 		if len(currentList) == 0 {                          //Si el algoritmo termino
-			graphList[index].done = true                             //El grafico se pinto
-			graphList[index].updateColor([]bool{false, true, false}) //Actualiza el color del grafico
+			graph.done = true                           //El grafico se pinto
+			graph.updateColor([]bool{true, true, true}) //Actualiza el color del grafico
 		} else { //Si el algoritmo no ha terminado
-			graphList[index].updateGraph(currentList) //Actualiza las barras
+			graph.updateGraph(currentList) //Actualiza las barras
 		}
 		//Pinta el grafico en ambos buffers
-		graphList[index].drawGraph()
+		graph.drawGraph()
 		window.SwapBuffers()
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) //La limpiamos
+		graph.drawGraph()
 	}
 }
 
@@ -185,10 +188,10 @@ func drawInWindow(xCut, yCut int32, currentList [][]int, index int) {
 
 // Crea un grafico nuevo con todos sus atributos.
 // (Posicion en y, color, lista de barras que lo componen, lado de la pantalla donde se ubica, nombre del algoritmo que representa)
-func createGraph(yPos float32, data [][]int, color []bool, lado bool, algorithmName string) *graph {
+func createGraph(yPos float32, data []int, color []bool, lado bool, algorithmName string) *graph {
 	var newBars []*bar
 	for i := 0; i < len(data); i++ {
-		newB := createBar(float32(i), yPos, data[i][0], color, lado)
+		newB := createBar(float32(i), yPos, data[i], color, lado)
 		newBars = append(newBars, newB)
 	}
 
@@ -212,29 +215,17 @@ func (g *graph) drawGraph() {
 }
 
 // Actualiza las barras:
-// V0: Actualiza la lista entera con la lista que recibe del canal del algoritmo.
 func (g *graph) updateGraph(data [][]int) {
 
-	//UPDATE EACH BAR: va a funcionar cuando los algoritmos retornen solo un elemento o indice
-
-	// g.bars[data[0][1]], g.bars[data[1][1]] = g.bars[data[1][1]], g.bars[data[0][1]]
-	for i := 0; i < len(g.bars); i++ {
-		if int(g.bars[i].index) == data[1][1] {
-			fmt.Println(i, " ", float32(data[1][1]), " ", g.bars[i].index)
-			g.bars[i].setDrawable(float32(data[1][1]), g.yPosition, data[1][0], g.lado)
-			g.bars[i].index = float32(data[1][1])
-			g.bars[i].value = data[1][0]
-		}
-		if int(g.bars[i].index) == data[0][1] {
-			g.bars[i].setDrawable(float32(data[1][1]), g.yPosition, data[0][0], g.lado)
-			g.bars[i].index = float32(data[0][1])
-			g.bars[i].value = data[0][0]
-		}
+	for i := 0; i < len(data); i++ {
+		g.bars[data[i][1]].setDrawable(float32(data[i][1]), g.yPosition, data[i][0], g.lado)
+		g.bars[data[i][1]].index = float32(data[i][1])
+		g.bars[data[i][1]].value = data[i][0]
 	}
-	// for i := 0; i < len(g.bars); i++ {
-	// 	g.bars[i].setDrawable(float32(data[i][1]), g.yPosition, data[i][0], g.lado)
-	// 	g.bars[i].index = float32(data[i][1])
-	// 	g.bars[i].value = data[i][0]
+	// for i := 0; i < len(data); i++ {
+	// 	g.bars[i].setDrawable(float32(i), g.yPosition, data[i], g.lado)
+	// 	g.bars[i].index = float32(i)
+	// 	g.bars[i].value = data[i]
 	// }
 
 }

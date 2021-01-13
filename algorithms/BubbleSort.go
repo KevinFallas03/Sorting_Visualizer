@@ -1,7 +1,7 @@
 package algorithms
 
 //BubbleSort ...
-func BubbleSort(data [][]int, c chan [][]int, stopCh chan struct{}, msgCh chan string) {
+func BubbleSort(data []int, c chan [][]int, stopCh chan struct{}, msgCh chan string) {
 	swaps := 0
 	comparations := 0
 	loops := 0
@@ -11,15 +11,15 @@ func BubbleSort(data [][]int, c chan [][]int, stopCh chan struct{}, msgCh chan s
 		loops++
 		for j := 1; j < len(data)-i; j++ {
 			comparations++
-			if data[j][0] < data[j-1][0] {
+			if data[j] < data[j-1] {
 
-				data[j][0], data[j-1][0] = data[j-1][0], data[j][0]
+				data[j], data[j-1] = data[j-1], data[j]
 				select {
 				case <-stopCh:
 					close(c)
 					return
 					//case c <- data:
-				case c <- [][]int{data[j], data[j-1]}:
+				case c <- [][]int{[]int{data[j], j}, []int{data[j-1], j - 1}}:
 				}
 				swaps++
 			}
