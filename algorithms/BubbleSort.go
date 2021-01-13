@@ -18,7 +18,6 @@ func BubbleSort(data []int, c chan [][]int, stopCh chan struct{}, msgCh chan str
 				case <-stopCh:
 					close(c)
 					return
-					//case c <- data:
 				case c <- [][]int{[]int{data[j], j}, []int{data[j-1], j - 1}}:
 				}
 				swaps++
